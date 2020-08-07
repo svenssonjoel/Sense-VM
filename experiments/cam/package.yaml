@@ -27,8 +27,6 @@ library:
     ghc-options:
     - -fwarn-incomplete-patterns
     dependencies:
-    - ghc
-    - ghc-exactprint
     - haskell-src
     - mtl
     default-extensions:
@@ -45,8 +43,6 @@ executables:
     - -fwarn-incomplete-patterns
     dependencies:
     - cam
-    - ghc
-    - ghc-exactprint
     - haskell-src
     - mtl
     default-extensions:
@@ -61,7 +57,6 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     - -fwarn-incomplete-patterns
-    - -fplugin=Generator
     dependencies:
     - cam
     - mtl

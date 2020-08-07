@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 626cbe65f3fc814f0ce066b9138a22b761d34fe0811c92e081d3bada8d18b037
+-- hash: ad12bfc96e1b9d26fe59b6a9ef4fa4e05a46eb21eee1ff7f37dc99120bffafea
 
 name:           cam
 version:        0.1.0.0
@@ -42,8 +42,6 @@ library
   ghc-options: -fwarn-incomplete-patterns
   build-depends:
       base >=4.7 && <5
-    , ghc
-    , ghc-exactprint
     , haskell-src
     , mtl
   default-language: Haskell2010
@@ -65,8 +63,6 @@ executable cam-exe
   build-depends:
       base >=4.7 && <5
     , cam
-    , ghc
-    , ghc-exactprint
     , haskell-src
     , mtl
   default-language: Haskell2010
@@ -79,7 +75,7 @@ test-suite cam-test
   hs-source-dirs:
       test
   default-extensions: GeneralizedNewtypeDeriving
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-patterns -fplugin=Generator
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-patterns
   build-depends:
       base >=4.7 && <5
     , cam

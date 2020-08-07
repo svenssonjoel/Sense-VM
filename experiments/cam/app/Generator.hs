@@ -22,7 +22,11 @@
 
 module Generator where
 
+import Control.Monad
+
 import Language.Haskell.Parser
+import Language.Haskell.Pretty
+import Language.Haskell.Syntax
 
 -- import GhcPlugins
 -- import Language.Haskell.GHC.ExactPrint.Utils
@@ -69,4 +73,19 @@ parseInterpreter = do
   let result = case parseModule interpreter of
                  ParseOk a -> a
                  ParseFailed srcloc s -> error $ show srcloc
-  putStrLn $ show result
+  let (HsModule _ _ _ importDecls allDecls) = result
+  let foo = prettyPrint result
+  let z   = join $ map (\a -> case a of
+                         HsFunBind matches -> matches
+                         _           -> []
+                       ) allDecls
+  let y   = filter (\a -> case a of
+                            (HsTypeSig _ [(HsIdent "loadi")] _) -> True
+                            _           -> False
+                       ) allDecls
+
+  putStrLn $ show $ filter (\r -> case r of
+                                    (HsMatch _ (HsIdent "loadi") _ _ _) -> True
+                                    _ -> False
+                               ) z
+  putStrLn $ show y

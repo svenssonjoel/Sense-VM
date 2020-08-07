@@ -26,7 +26,8 @@ module Bytecode.InterpreterModel where
 import CAM
 import Data.List (find)
 import GHC.Arr
-import qualified Control.Monad.State.Strict as S
+import Control.Monad.State.Strict(MonadState, StateT (..), State,
+                                  evalState, get, put, gets, modify)
 
 {-
 NOTE: This is not the actual "byte"code interpreter.
@@ -55,13 +56,13 @@ data Code = Code { instrs :: Array Index Instruction
 
 newtype Evaluate a =
   Evaluate
-    { runEvaluate :: S.State Code a
+    { runEvaluate :: State Code a
     }
   deriving (Functor, Applicative, Monad)
 
-instance S.MonadState Code Evaluate where
-  get   = Evaluate $ S.StateT $ \s -> return (s,s)
-  put s = Evaluate $ S.StateT $ \_ -> return ((),s)
+instance MonadState Code Evaluate where
+  get   = Evaluate $ StateT $ \s -> return (s,s)
+  put s = Evaluate $ StateT $ \_ -> return ((),s)
 
 -- Val is basically Weak Head Normal Form
 data Val = VInt  Int  -- constants s(0)
@@ -93,7 +94,7 @@ evaluate :: CAM -> Val
 evaluate cam = val
   where
     code = initCode cam
-    val  = S.evalState (runEvaluate eval) code
+    val  = evalState (runEvaluate eval) code
 
 initCode :: CAM -> Code
 initCode cam = Code { instrs = listArray (1, totalInstrs) caminstrs
@@ -184,39 +185,39 @@ emptyST = []
 
 readCurrent :: Evaluate Instruction
 readCurrent = do
-  is <- S.gets instrs
-  pc <- S.gets programCounter
+  is <- gets instrs
+  pc <- gets programCounter
   pure $! is ! pc
 
 incPC :: Evaluate ()
 incPC  = do
-  pc <- S.gets programCounter
-  S.modify $ \s -> s {programCounter = pc + 1}
+  pc <- gets programCounter
+  modify $ \s -> s {programCounter = pc + 1}
 
 jumpTo :: Label -> Evaluate ()
 jumpTo l = do
-  pc <- S.gets programCounter
-  st <- S.gets symbolTable
-  pj <- S.gets prevJump
+  pc <- gets programCounter
+  st <- gets symbolTable
+  pj <- gets prevJump
   let ix = st ~> l
-  S.modify $ \s -> s { programCounter = ix
-                     , prevJump = pc : pj
-                     }
+  modify $ \s -> s { programCounter = ix
+                   , prevJump = pc : pj
+                   }
 
 -- return back to the previous "jumped from" label
 -- and increment the program counter by 1
 retBack :: Evaluate ()
 retBack = do
-  pj <- S.gets prevJump
-  S.modify $ \s -> s { programCounter = head pj + 1
-                     , prevJump = tail pj
-                     }
+  pj <- gets prevJump
+  modify $ \s -> s { programCounter = head pj + 1
+                   , prevJump = tail pj
+                   }
 
 getEnv :: Evaluate Environment
-getEnv = S.gets environment
+getEnv = gets environment
 
 getStack :: Evaluate Stack
-getStack = S.gets stack
+getStack = gets stack
 
 popAndRest :: Evaluate (Val, Stack)
 popAndRest = do
@@ -228,14 +229,14 @@ fstEnv :: Evaluate ()
 fstEnv = do
   e <- getEnv
   case e of
-    VPair v _ -> S.modify $ \s -> s { environment = v }
+    VPair v _ -> modify $ \s -> s { environment = v }
     _ -> error "first operation on incorrect value type"
 
 sndEnv :: Evaluate ()
 sndEnv = do
   e <- getEnv
   case e of
-    VPair _ v -> S.modify $ \s -> s { environment = v }
+    VPair _ v -> modify $ \s -> s { environment = v }
     _ -> error "second operation on incorrect value type"
 
 accessnth :: Int -> Evaluate ()
@@ -256,24 +257,25 @@ push :: Evaluate ()
 push = do
   e  <- getEnv
   st <- getStack
-  S.modify $ \s -> s { stack = e : st }
+  modify $ \s -> s { stack = e : st }
 
 swap :: Evaluate ()
 swap = do
   e      <- getEnv
   (h, t) <- popAndRest
-  S.modify $ \s -> s { stack = e : t
-                     , environment = h
-                     }
+  modify $ \s -> s { stack = e : t
+                   , environment = h
+                   }
 
 loadi :: Int -> Evaluate ()
-loadi i = S.modify $ \s -> s { environment = VInt i }
+loadi i = modify $ \s -> s { environment = VInt i }
+
 
 loadb :: Bool -> Evaluate ()
-loadb b = S.modify $ \s -> s { environment = VBool b }
+loadb b = modify $ \s -> s { environment = VBool b }
 
 clear :: Evaluate ()
-clear = S.modify $ \s -> s { environment = VEmpty }
+clear = modify $ \s -> s { environment = VEmpty }
 
 unaryop :: UnaryOp -> Evaluate ()
 unaryop uop = do
@@ -281,16 +283,16 @@ unaryop uop = do
   case uop of
     Abs -> do
       let (VInt i) = e -- XXX: Partial
-      S.modify $ \s -> s { environment = VInt (abs i) }
+      modify $ \s -> s { environment = VInt (abs i) }
     Neg -> do
       let (VInt i) = e
-      S.modify $ \s -> s { environment = VInt (negate i) }
+      modify $ \s -> s { environment = VInt (negate i) }
     NOT -> do
       let (VBool b) = e
-      S.modify $ \s -> s { environment = VBool (not b) }
+      modify $ \s -> s { environment = VBool (not b) }
     DEC -> do
       let (VInt i) = e
-      S.modify $ \s -> s { environment = VInt (i - 1) }
+      modify $ \s -> s { environment = VInt (i - 1) }
 
 binaryop :: BinOp -> Evaluate ()
 binaryop bop = do
@@ -300,105 +302,105 @@ binaryop bop = do
     Plus -> do
       let (VInt i1) = e -- XXX: Partial
       let (VInt i2) = h
-      S.modify $ \s -> s { environment = VInt (i2 + i1)
-                         , stack = t
-                         }
+      modify $ \s -> s { environment = VInt (i2 + i1)
+                       , stack = t
+                       }
     Multiply -> do
       let (VInt i1) = e
       let (VInt i2) = h
-      S.modify $ \s -> s { environment = VInt (i2 * i1)
-                         , stack = t
-                         }
+      modify $ \s -> s { environment = VInt (i2 * i1)
+                       , stack = t
+                       }
     Minus -> do
       let (VInt i1) = e
       let (VInt i2) = h
-      S.modify $ \s -> s { environment = VInt (i2 - i1)
-                         , stack = t
-                         }
+      modify $ \s -> s { environment = VInt (i2 - i1)
+                       , stack = t
+                       }
     BGT -> do
       let (VInt i1) = e
       let (VInt i2) = h
-      S.modify $ \s -> s { environment = VBool (i2 > i1)
-                         , stack = t
-                         }
+      modify $ \s -> s { environment = VBool (i2 > i1)
+                       , stack = t
+                       }
     BLT -> do
       let (VInt i1) = e
       let (VInt i2) = h
-      S.modify $ \s -> s { environment = VBool (i2 < i1)
-                         , stack = t
-                         }
+      modify $ \s -> s { environment = VBool (i2 < i1)
+                       , stack = t
+                       }
     BGE -> do
       let (VInt i1) = e
       let (VInt i2) = h
-      S.modify $ \s -> s { environment = VBool (i2 >= i1)
-                         , stack = t
-                         }
+      modify $ \s -> s { environment = VBool (i2 >= i1)
+                       , stack = t
+                       }
     BLE -> do
       let (VInt i1) = e
       let (VInt i2) = h
-      S.modify $ \s -> s { environment = VBool (i2 <= i1)
-                         , stack = t
-                         }
+      modify $ \s -> s { environment = VBool (i2 <= i1)
+                       , stack = t
+                       }
     BEQ -> do
       case (e,h) of
         (VInt i1, VInt i2) ->
-          S.modify $ \s -> s { environment = VBool (i2 == i1)
-                             , stack = t
-                             }
+          modify $ \s -> s { environment = VBool (i2 == i1)
+                           , stack = t
+                           }
         (VBool b1, VBool b2) ->
-          S.modify $ \s -> s { environment = VBool (b2 == b1)
-                             , stack = t
-                             }
+          modify $ \s -> s { environment = VBool (b2 == b1)
+                           , stack = t
+                           }
         (VEmpty, VEmpty) ->
-          S.modify $ \s -> s { environment = VBool True
-                             , stack = t
-                             }
+          modify $ \s -> s { environment = VBool True
+                           , stack = t
+                           }
         (VPair v1 v2, VPair v3 v4) ->
-          S.modify $ \s -> s { environment = VBool (v1 == v3 &&
+          modify $ \s -> s { environment = VBool (v1 == v3 &&
                                                     v2 == v4)
-                             , stack = t
-                             }
+                           , stack = t
+                           }
         (VCon t1 v1, VCon t2 v2) ->
-          S.modify $ \s -> s { environment = VBool (t1 == t2 &&
+          modify $ \s -> s { environment = VBool (t1 == t2 &&
                                                     v1 == v2)
-                             , stack = t
-                             }
+                           , stack = t
+                           }
         _ -> error "Equality not supported for other whnf types"
 
 cons :: Evaluate ()
 cons = do
   e      <- getEnv
   (h, t) <- popAndRest
-  S.modify $ \s -> s { environment = VPair h e
-                     , stack = t
-                     }
+  modify $ \s -> s { environment = VPair h e
+                   , stack = t
+                   }
 
 cur :: Label -> Evaluate ()
 cur l = do
   e <- getEnv
-  S.modify $ \s -> s { environment = VClosure e l }
+  modify $ \s -> s { environment = VClosure e l }
 
 pack :: Tag -> Evaluate ()
 pack t = do
   e <- getEnv
-  S.modify $ \s -> s { environment = VCon t e }
+  modify $ \s -> s { environment = VCon t e }
 
 app :: Evaluate ()
 app = do
   e      <- getEnv
   (h, t) <- popAndRest
   let (VClosure val label) = e -- XXX: Partial
-  S.modify $ \s -> s { environment = VPair val h
-                     , stack = t
-                     }
+  modify $ \s -> s { environment = VPair val h
+                   , stack = t
+                   }
   jumpTo label
 
 goto :: Label -> Evaluate ()
 goto l = do
-  pc <- S.gets programCounter
-  st <- S.gets symbolTable
+  pc <- gets programCounter
+  st <- gets symbolTable
   let ix = st ~> l
-  S.modify $ \s -> s { programCounter = ix }
+  modify $ \s -> s { programCounter = ix }
 
 gotofalse :: Label -> Evaluate ()
 gotofalse l = do
@@ -407,13 +409,13 @@ gotofalse l = do
   case e of
     VBool True -> do
       incPC
-      S.modify $ \s -> s { environment = h
-                         , stack = t
-                         }
+      modify $ \s -> s { environment = h
+                       , stack = t
+                       }
     VBool False -> do
-      S.modify $ \s -> s { environment = h
-                         , stack = t
-                         }
+      modify $ \s -> s { environment = h
+                       , stack = t
+                       }
       goto l
     _ -> error "GOTOFALSE instuction applied to incorrect operand"
 
@@ -426,9 +428,9 @@ switch conds = do
         case find (\(c,_) -> c == ci) conds of
           Just (cf, lf) -> (cf, lf)
           Nothing -> error $ "Missing constructor" <> show ci
-  S.modify $ \s -> s { environment = VPair h v1
-                     , stack = t
-                     }
+  modify $ \s -> s { environment = VPair h v1
+                   , stack = t
+                   }
   jumpTo label
 
 
