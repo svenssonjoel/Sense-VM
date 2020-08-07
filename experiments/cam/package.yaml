@@ -29,6 +29,7 @@ library:
     dependencies:
     - ghc
     - ghc-exactprint
+    - haskell-src
     - mtl
     default-extensions:
     - GeneralizedNewtypeDeriving
@@ -46,6 +47,7 @@ executables:
     - cam
     - ghc
     - ghc-exactprint
+    - haskell-src
     - mtl
     default-extensions:
     - GeneralizedNewtypeDeriving
@@ -60,7 +62,6 @@ tests:
     - -with-rtsopts=-N
     - -fwarn-incomplete-patterns
     - -fplugin=Generator
-    - -ddump-parsed
     dependencies:
     - cam
     - mtl

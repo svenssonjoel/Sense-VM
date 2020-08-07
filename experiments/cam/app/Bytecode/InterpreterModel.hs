@@ -20,6 +20,7 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Bytecode.InterpreterModel where
 
 import CAM
@@ -56,8 +57,11 @@ newtype Evaluate a =
   Evaluate
     { runEvaluate :: S.State Code a
     }
-  deriving (Functor, Applicative, Monad, S.MonadState Code)
+  deriving (Functor, Applicative, Monad)
 
+instance S.MonadState Code Evaluate where
+  get   = Evaluate $ S.StateT $ \s -> return (s,s)
+  put s = Evaluate $ S.StateT $ \_ -> return ((),s)
 
 -- Val is basically Weak Head Normal Form
 data Val = VInt  Int  -- constants s(0)

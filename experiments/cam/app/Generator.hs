@@ -20,26 +20,53 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
-module Generator (plugin) where
+module Generator where
 
-import GhcPlugins
-import TcRnTypes
-import Outputable
-import Language.Haskell.GHC.ExactPrint.Utils
+import Language.Haskell.Parser
 
-plugin :: Plugin
-plugin =
-  defaultPlugin
-  { typeCheckResultAction = typecheckedPlugin }
+-- import GhcPlugins
+-- import Language.Haskell.GHC.ExactPrint.Utils
+-- import Outputable
+-- import TcRnTypes
 
-typecheckedPlugin :: [CommandLineOption]
-                  -> ModSummary
-                  -> TcGblEnv
-                  -> TcM TcGblEnv
-typecheckedPlugin opts ms tcgblenv = do
-  let tyEnv = showSDoc_ $ ppr $ tcg_type_env tcgblenv
-  liftIO . putStrLn $
-    "generating \n" ++
-    tyEnv ++
-    "end generation"
-  return tcgblenv
+
+
+-- plugin :: Plugin
+-- plugin =
+--   defaultPlugin
+--   { parsedResultAction = parsedPlugin
+--   , typeCheckResultAction = typecheckedPlugin
+--   }
+
+-- typecheckedPlugin :: [CommandLineOption]
+--                   -> ModSummary
+--                   -> TcGblEnv
+--                   -> TcM TcGblEnv
+-- typecheckedPlugin opts ms tcgblenv = return tcgblenv -- do
+--   -- let tyEnv = showSDoc_ $ ppr $ tcg_type_env tcgblenv
+--   -- liftIO . putStrLn $
+--   --   "generating \n" ++
+--   --   tyEnv ++
+--   --   "end generation"
+--   -- return tcgblenv
+
+-- parsedPlugin :: [CommandLineOption]
+--              -> ModSummary
+--              -> HsParsedModule
+--              -> Hsc HsParsedModule
+-- parsedPlugin opts ms hspm = do
+--   let hpmm = showSDoc_ $ ppr $ hpm_module hspm
+--   liftIO . putStrLn $
+--     "generating \n" ++
+--     hpmm ++
+--     "end generation"
+--   return hspm
+
+location = "/Users/abhiroopsarkar/C/Sense-VM/experiments/cam/app/Bytecode/InterpreterModel.hs"
+
+parseInterpreter = do
+  interpreter <- readFile location
+  let result = case parseModule interpreter of
+                 ParseOk a -> a
+                 ParseFailed srcloc s -> error $ show srcloc
+  putStrLn $ show result
