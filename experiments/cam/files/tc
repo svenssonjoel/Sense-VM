@@ -1,0 +1,902 @@
+TYPE SIGNATURES
+  Main.Code ::
+    Array Index Instruction
+    -> SymbolTable -> [Index] -> Environment -> Stack -> Index -> Code
+  Main.Evaluate :: forall a. S.State Code a -> Evaluate a
+  Main.VBool :: Bool -> Val
+  Main.VClosure :: Val -> Label -> Val
+  Main.VComb :: Label -> Val
+  Main.VCon :: Tag -> Val -> Val
+  Main.VEmpty :: Val
+  Main.VInt :: Int -> Val
+  Main.VPair :: Val -> Val -> Val
+  accessnth :: Int -> Evaluate ()
+  app :: Evaluate ()
+  binaryop :: BinOp -> Evaluate ()
+  clear :: Evaluate ()
+  cons :: Evaluate ()
+  cur :: Label -> Evaluate ()
+  dummyLabel :: [Char]
+  emptyST :: SymbolTable
+  environment :: Code -> Environment
+  eval :: Evaluate Val
+  evaluate :: CAM -> Val
+  fstEnv :: Evaluate ()
+  genInstrs :: CAM -> Label -> [(Instruction, Label)]
+  getEnv :: Evaluate Environment
+  getStack :: Evaluate Stack
+  goto :: Label -> Evaluate ()
+  gotofalse :: Label -> Evaluate ()
+  incPC :: Evaluate ()
+  initCode :: CAM -> Code
+  instrs :: Code -> Array Index Instruction
+  jumpTo :: Label -> Evaluate ()
+  loadb :: Bool -> Evaluate ()
+  loadi :: Int -> Evaluate ()
+  :Main.main :: IO ()
+  main :: IO ()
+  pack :: Tag -> Evaluate ()
+  popAndRest :: Evaluate (Val, Stack)
+  prevJump :: Code -> [Index]
+  programCounter :: Code -> Index
+  push :: Evaluate ()
+  put :: SymbolTable -> Label -> Index -> SymbolTable
+  readCurrent :: Evaluate Instruction
+  restnth :: Int -> Evaluate ()
+  retBack :: Evaluate ()
+  runEvaluate :: forall a. Evaluate a -> S.State Code a
+  sndEnv :: Evaluate ()
+  stack :: Code -> Stack
+  swap :: Evaluate ()
+  switch :: [(Tag, Label)] -> Evaluate ()
+  symbolTable :: Code -> SymbolTable
+  unaryop :: UnaryOp -> Evaluate ()
+  ~> :: SymbolTable -> Label -> Index
+TYPE CONSTRUCTORS
+  data Code
+    = Code {instrs :: Array Index Instruction,
+            symbolTable :: SymbolTable,
+            prevJump :: [Index],
+            environment :: Environment,
+            stack :: Stack,
+            programCounter :: Index}
+  type Environment = Val
+  type role Evaluate nominal
+  newtype Evaluate a = Evaluate {runEvaluate :: S.State Code a}
+  type Index = Int
+  type Stack = [Val]
+  type SymbolTable = [(Label, Index)]
+  data Val
+    = VInt Int
+    | VBool Bool
+    | VEmpty
+    | VPair Val Val
+    | VCon Tag Val
+    | VClosure Val Label
+    | VComb Label
+COERCION AXIOMS
+  axiom Main.N:Evaluate ::
+    Evaluate = S.StateT Code Data.Functor.Identity.Identity
+      -- Defined at test/Spec.hs:31:1
+INSTANCES
+  instance S.MonadState Code Evaluate
+    -- Defined at test/Spec.hs:35:42
+  instance Monad Evaluate -- Defined at test/Spec.hs:35:35
+  instance Applicative Evaluate -- Defined at test/Spec.hs:35:22
+  instance Functor Evaluate -- Defined at test/Spec.hs:35:13
+  instance Show Code -- Defined at test/Spec.hs:29:29
+  instance Eq Val -- Defined at test/Spec.hs:46:25
+  instance Ord Val -- Defined at test/Spec.hs:46:20
+  instance Show Val -- Defined at test/Spec.hs:49:10
+Dependent modules: []
+Dependent packages: [base-4.12.0.0, cam-0.1.0.0, ghc-prim-0.5.3,
+                     integer-gmp-1.0.2.0, mtl-2.2.2, transformers-0.5.6.2]
+
+==================== Typechecker ====================
+Main.$tcEvaluate
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      9356840842307038753##
+      16993622277665135346##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "Evaluate"#)
+      0
+      ghc-prim-0.5.3:GHC.Types.krep$*Arr*
+Main.$tc'Evaluate
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      6825779726712732947##
+      2062768334146573613##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "'Evaluate"#)
+      1
+      $krep_a58B
+Main.$tcCode
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      17297610913424220401##
+      10252092002546415437##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "Code"#)
+      0
+      ghc-prim-0.5.3:GHC.Types.krep$*
+Main.$tc'Code
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      15293513732699985617##
+      8459699260504513419##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "'Code"#)
+      0
+      $krep_a58H
+Main.$tcVal
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      7463231145256676633##
+      9133200204911899045##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "Val"#)
+      0
+      ghc-prim-0.5.3:GHC.Types.krep$*
+Main.$tc'VInt
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      555947790900908155##
+      3302540508101207587##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "'VInt"#)
+      0
+      $krep_a58X
+Main.$tc'VBool
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      6242665678672808888##
+      8734411569983484757##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "'VBool"#)
+      0
+      $krep_a58Y
+Main.$tc'VEmpty
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      3939378916553341711##
+      11372157520164183736##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "'VEmpty"#)
+      0
+      $krep_a58T
+Main.$tc'VPair
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      18140751662110404069##
+      8787411089338803203##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "'VPair"#)
+      0
+      $krep_a590
+Main.$tc'VCon
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      1987018099100210024##
+      2039890421318971974##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "'VCon"#)
+      0
+      $krep_a592
+Main.$tc'VClosure
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      5580477828456513405##
+      7043626825372676771##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "'VClosure"#)
+      0
+      $krep_a593
+Main.$tc'VComb
+  = ghc-prim-0.5.3:GHC.Types.TyCon
+      7567321028661874344##
+      5405532923392613648##
+      Main.$trModule
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "'VComb"#)
+      0
+      $krep_a594
+$krep_a58E [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      Data.Functor.Identity.$tcIdentity []
+$krep_a58F [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepVar 0
+$krep_a58B [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58C $krep_a58G
+$krep_a58H [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58I $krep_a58L
+$krep_a58L [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58M $krep_a58Q
+$krep_a58U [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58V $krep_a58W
+$krep_a58Q [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58R $krep_a58S
+$krep_a592 [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58O $krep_a591
+$krep_a594 [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58O $krep_a58T
+$krep_a58W [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58J $krep_a58D
+$krep_a58X [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58J $krep_a58T
+$krep_a58Y [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58Z $krep_a58T
+$krep_a58S [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58T $krep_a58U
+$krep_a593 [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58T $krep_a594
+$krep_a590 [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58T $krep_a591
+$krep_a591 [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepFun $krep_a58T $krep_a58T
+$krep_a58C [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      transformers-0.5.6.2:Control.Monad.Trans.State.Strict.$tcStateT
+      ((:) $krep_a58D ((:) $krep_a58E ((:) $krep_a58F [])))
+$krep_a58I [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      GHC.Arr.$tcArray ((:) $krep_a58J ((:) $krep_a58K []))
+$krep_a58N [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      ghc-prim-0.5.3:GHC.Tuple.$tc(,)
+      ((:) $krep_a58O ((:) $krep_a58J []))
+$krep_a58G [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      Main.$tcEvaluate ((:) $krep_a58F [])
+$krep_a58M [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      ghc-prim-0.5.3:GHC.Types.$tc[] ((:) $krep_a58N [])
+$krep_a58O [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      ghc-prim-0.5.3:GHC.Types.$tc[] ((:) $krep_a58P [])
+$krep_a58R [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      ghc-prim-0.5.3:GHC.Types.$tc[] ((:) $krep_a58J [])
+$krep_a58V [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      ghc-prim-0.5.3:GHC.Types.$tc[] ((:) $krep_a58T [])
+$krep_a58D [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp Main.$tcCode []
+$krep_a58J [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      ghc-prim-0.5.3:GHC.Types.$tcInt []
+$krep_a58K [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp CAM.$tcInstruction []
+$krep_a58P [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      ghc-prim-0.5.3:GHC.Types.$tcChar []
+$krep_a58T [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp Main.$tcVal []
+$krep_a58Z [InlPrag=NOUSERINLINE[~]]
+  = ghc-prim-0.5.3:GHC.Types.KindRepTyConApp
+      ghc-prim-0.5.3:GHC.Types.$tcBool []
+Main.$trModule
+  = ghc-prim-0.5.3:GHC.Types.Module
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "main"#)
+      (ghc-prim-0.5.3:GHC.Types.TrNameS "Main"#)
+$con2tag_Kvp8SGCZuVJEdqDNoKaFx0_a4OL (VInt _) = 0#
+$con2tag_Kvp8SGCZuVJEdqDNoKaFx0_a4OL (VBool _) = 1#
+$con2tag_Kvp8SGCZuVJEdqDNoKaFx0_a4OL VEmpty = 2#
+$con2tag_Kvp8SGCZuVJEdqDNoKaFx0_a4OL (VPair _ _) = 3#
+$con2tag_Kvp8SGCZuVJEdqDNoKaFx0_a4OL (VCon _ _) = 4#
+$con2tag_Kvp8SGCZuVJEdqDNoKaFx0_a4OL (VClosure _ _) = 5#
+$con2tag_Kvp8SGCZuVJEdqDNoKaFx0_a4OL (VComb _) = 6#
+main_a4h4 = putStrLn "Test suite not yet implemented"
+dummyLabel = "dummy"
+clear_a4hd = S.modify $ \ s_a3s2 -> s_a3s2 {environment = VEmpty}
+loadb_a4hs b_a3s0
+  = S.modify $ \ s_a3s1 -> s_a3s1 {environment = VBool b_a3s0}
+loadi_a4hA i_a3rY
+  = S.modify $ \ s_a3rZ -> s_a3rZ {environment = VInt i_a3rY}
+getStack_a4hI = S.gets stack
+popAndRest_a4hR
+  = do st_a3rE <- getStack
+       let (h_a4i1 : t_a4i3) = st_a3rE
+       return (h_a3rF, t_a3rG)
+getEnv_a4id = S.gets environment
+fstEnv_a4ii
+  = do e_a3rH <- getEnv
+       case e_a3rH of
+         VPair v_a3rI _
+           -> S.modify $ \ s_a3rJ -> s_a3rJ {environment = v_a3rI}
+         _ -> error "first operation on incorrect value type"
+sndEnv_a4kb
+  = do e_a3rK <- getEnv
+       case e_a3rK of
+         VPair _ v_a3rL
+           -> S.modify $ \ s_a3rM -> s_a3rM {environment = v_a3rL}
+         _ -> error "second operation on incorrect value type"
+accessnth_a4ks 0 = sndEnv
+accessnth_a4ks n_a3rN
+  = do e_a3rO <- getEnv
+       fstEnv
+       accessnth (n_a3rN - 1)
+restnth_a4kT 0 = pure ()
+restnth_a4kT n_a3rP
+  = do e_a3rQ <- getEnv
+       fstEnv
+       restnth (n_a3rP - 1)
+push_a4ld
+  = do e_a3rR <- getEnv
+       st_a3rS <- getStack
+       S.modify $ \ s_a3rT -> s_a3rT {stack = e_a3rR : st_a3rS}
+swap_a4lu
+  = do e_a3rU <- getEnv
+       (h_a3rV, t_a3rW) <- popAndRest
+       S.modify
+         $ \ s_a3rX
+             -> s_a3rX {stack = e_a3rU : t_a3rW, environment = h_a3rV}
+unaryop_a4lL uop_a3s3
+  = do e_a3s4 <- getEnv
+       case uop_a3s3 of
+         Abs
+           -> do let (VInt i_a4m0) = e_a3s4
+                 S.modify $ \ s_a3s6 -> s_a3s6 {environment = VInt (abs i_a3s5)}
+         Neg
+           -> do let (VInt i_a4mg) = e_a3s4
+                 S.modify $ \ s_a3s8 -> s_a3s8 {environment = VInt (negate i_a3s7)}
+         NOT
+           -> do let (VBool b_a4mw) = e_a3s4
+                 S.modify $ \ s_a3sa -> s_a3sa {environment = VBool (not b_a3s9)}
+         DEC
+           -> do let (VInt i_a4mL) = e_a3s4
+                 S.modify $ \ s_a3sc -> s_a3sc {environment = VInt (i_a3sb - 1)}
+binaryop_a4mZ bop_a3sd
+  = do e_a3se <- getEnv
+       (h_a3sf, t_a3sg) <- popAndRest
+       case bop_a3sd of
+         Plus
+           -> do let (VInt i1_a4nm) = e_a3se
+                 let (VInt i2_a4nt) = h_a3sf
+                 S.modify
+                   $ \ s_a3sj
+                       -> s_a3sj {environment = VInt (i2_a3si + i1_a3sh), stack = t_a3sg}
+         Multiply
+           -> do let (VInt i1_a4nJ) = e_a3se
+                 let (VInt i2_a4nQ) = h_a3sf
+                 S.modify
+                   $ \ s_a3sm
+                       -> s_a3sm {environment = VInt (i2_a3sl * i1_a3sk), stack = t_a3sg}
+         Minus
+           -> do let (VInt i1_a4o6) = e_a3se
+                 let (VInt i2_a4od) = h_a3sf
+                 S.modify
+                   $ \ s_a3sp
+                       -> s_a3sp {environment = VInt (i2_a3so - i1_a3sn), stack = t_a3sg}
+         BGT
+           -> do let (VInt i1_a4ot) = e_a3se
+                 let (VInt i2_a4oA) = h_a3sf
+                 S.modify
+                   $ \ s_a3ss
+                       -> s_a3ss {environment = VBool (i2_a3sr > i1_a3sq), stack = t_a3sg}
+         BLT
+           -> do let (VInt i1_a4oQ) = e_a3se
+                 let (VInt i2_a4oX) = h_a3sf
+                 S.modify
+                   $ \ s_a3sv
+                       -> s_a3sv {environment = VBool (i2_a3su < i1_a3st), stack = t_a3sg}
+         BGE
+           -> do let (VInt i1_a4pd) = e_a3se
+                 let (VInt i2_a4pk) = h_a3sf
+                 S.modify
+                   $ \ s_a3sy
+                       -> s_a3sy
+                            {environment = VBool (i2_a3sx >= i1_a3sw), stack = t_a3sg}
+         BLE
+           -> do let (VInt i1_a4pA) = e_a3se
+                 let (VInt i2_a4pH) = h_a3sf
+                 S.modify
+                   $ \ s_a3sB
+                       -> s_a3sB
+                            {environment = VBool (i2_a3sA <= i1_a3sz), stack = t_a3sg}
+         BEQ
+           -> do case (e_a3se, h_a3sf) of
+                   (VInt i1_a3sC, VInt i2_a3sD)
+                     -> S.modify
+                          $ \ s_a3sE
+                              -> s_a3sE
+                                   {environment = VBool (i2_a3sD == i1_a3sC), stack = t_a3sg}
+                   (VBool b1_a3sF, VBool b2_a3sG)
+                     -> S.modify
+                          $ \ s_a3sH
+                              -> s_a3sH
+                                   {environment = VBool (b2_a3sG == b1_a3sF), stack = t_a3sg}
+                   (VEmpty, VEmpty)
+                     -> S.modify
+                          $ \ s_a3sI -> s_a3sI {environment = VBool True, stack = t_a3sg}
+                   (VPair v1_a3sJ v2_a3sK, VPair v3_a3sL v4_a3sM)
+                     -> S.modify
+                          $ \ s_a3sN
+                              -> s_a3sN
+                                   {environment = VBool (v1_a3sJ == v3_a3sL && v2_a3sK == v4_a3sM),
+                                    stack = t_a3sg}
+                   (VCon t1_a3sO v1_a3sP, VCon t2_a3sQ v2_a3sR)
+                     -> S.modify
+                          $ \ s_a3sS
+                              -> s_a3sS
+                                   {environment = VBool (t1_a3sO == t2_a3sQ && v1_a3sP == v2_a3sR),
+                                    stack = t_a3sg}
+                   _ -> error "Equality not supported for other whnf types"
+cons_a4qN
+  = do e_a3sT <- getEnv
+       (h_a3sU, t_a3sV) <- popAndRest
+       S.modify
+         $ \ s_a3sW
+             -> s_a3sW {environment = VPair h_a3sU e_a3sT, stack = t_a3sV}
+cur_a4r3 l_a3sX
+  = do e_a3sY <- getEnv
+       S.modify
+         $ \ s_a3sZ -> s_a3sZ {environment = VClosure e_a3sY l_a3sX}
+pack_a4rf t_a3t0
+  = do e_a3t1 <- getEnv
+       S.modify $ \ s_a3t2 -> s_a3t2 {environment = VCon t_a3t0 e_a3t1}
+retBack_a4rr
+  = do pj_a3rC <- S.gets prevJump
+       S.modify
+         $ \ s_a3rD
+             -> s_a3rD
+                  {programCounter = head pj_a3rC + 1, prevJump = tail pj_a3rC}
+incPC_a4rR
+  = do pc_a3pD <- S.gets programCounter
+       S.modify $ \ s_a3pE -> s_a3pE {programCounter = pc_a3pD + 1}
+readCurrent_a4sb
+  = do is_a3pB <- S.gets instrs
+       pc_a3pC <- S.gets programCounter
+       pure $! is_a3pB ! pc_a3pC
+emptyST_a4sI = []
+put_a4sJ st_a3py l_a3pz idx_a3pA = (l_a3pz, idx_a3pA) : st_a3py
+(~>_a4sN) [] _ = error "Label missing in symbol table"
+(~>_a4sN) ((label_a3pu, idx_a3pv) : st_a3pw) l_a3px
+  | l_a3px == label_a3pu = idx_a3pv
+  | otherwise = st_a3pw ~> l_a3px
+jumpTo_a4sU l_a3rw
+  = do pc_a3rx <- S.gets programCounter
+       st_a3ry <- S.gets symbolTable
+       pj_a3rz <- S.gets prevJump
+       let ix_a3rA = st_a3ry ~> l_a3rw
+       S.modify
+         $ \ s_a3rB
+             -> s_a3rB {programCounter = ix_a3rA, prevJump = pc_a3rx : pj_a3rz}
+app_a4ty
+  = do e_a3t3 <- getEnv
+       (h_a3t4, t_a3t5) <- popAndRest
+       let (VClosure val_a4tL label_a4tN) = e_a3t3
+       S.modify
+         $ \ s_a3t8
+             -> s_a3t8 {environment = VPair val_a3t6 h_a3t4, stack = t_a3t5}
+       jumpTo label_a3t7
+switch_a4u3 conds_a3tk
+  = do e_a3tl <- getEnv
+       (h_a3tm, t_a3tn) <- popAndRest
+       let VCon ci_a4ug v1_a4ui = e_a3tl
+       let (_, label_a4ut)
+             = case find (\ (c_a3tr, _) -> c_a3tr == ci_a3to) conds_a3tk of
+                 Just (cf_a3uj, lf_a3uk) -> (cf_a3uj, lf_a3uk)
+                 Nothing -> error $ "Missing constructor" <> show ci_a3to
+       S.modify
+         $ \ s_a3ul
+             -> s_a3ul {environment = VPair h_a3tm v1_a3tp, stack = t_a3tn}
+       jumpTo label_a3tq
+goto_a4vZ l_a3t9
+  = do pc_a3ta <- S.gets programCounter
+       st_a3tb <- S.gets symbolTable
+       let ix_a3tc = st_a3tb ~> l_a3t9
+       S.modify $ \ s_a3td -> s_a3td {programCounter = ix_a3tc}
+gotofalse_a4wu l_a3te
+  = do e_a3tf <- getEnv
+       (h_a3tg, t_a3th) <- popAndRest
+       case e_a3tf of
+         VBool True
+           -> do incPC
+                 S.modify
+                   $ \ s_a3ti -> s_a3ti {environment = h_a3tg, stack = t_a3th}
+         VBool False
+           -> do S.modify
+                   $ \ s_a3tj -> s_a3tj {environment = h_a3tg, stack = t_a3th}
+                 goto l_a3te
+         _ -> error "GOTOFALSE instuction applied to incorrect operand"
+eval_a4x4
+  = do currentInstr_a3p1 <- readCurrent
+       case currentInstr_a3p1 of
+         FST
+           -> do incPC
+                 fstEnv
+                 eval
+         SND
+           -> do incPC
+                 sndEnv
+                 eval
+         ACC n_a3p2
+           -> do incPC
+                 accessnth n_a3p2
+                 eval
+         REST n_a3p3
+           -> do incPC
+                 restnth n_a3p3
+                 eval
+         PUSH
+           -> do incPC
+                 push
+                 eval
+         SWAP
+           -> do incPC
+                 swap
+                 eval
+         QUOTE (LInt i_a3p4)
+           -> do incPC
+                 loadi i_a3p4
+                 eval
+         QUOTE (LBool b_a3p5)
+           -> do incPC
+                 loadb b_a3p5
+                 eval
+         CLEAR
+           -> do incPC
+                 clear
+                 eval
+         PRIM1 uop_a3p6
+           -> do incPC
+                 unaryop uop_a3p6
+                 eval
+         PRIM2 bop_a3p7
+           -> do incPC
+                 binaryop bop_a3p7
+                 eval
+         CONS
+           -> do incPC
+                 cons
+                 eval
+         CUR l_a3p8
+           -> do incPC
+                 cur l_a3p8
+                 eval
+         PACK c_a3p9
+           -> do incPC
+                 pack c_a3p9
+                 eval
+         SKIP
+           -> do incPC
+                 eval
+         STOP -> getEnv
+         APP
+           -> do app
+                 eval
+         RETURN
+           -> do retBack
+                 eval
+         CALL l_a3pa
+           -> do jumpTo l_a3pa
+                 eval
+         GOTO l_a3pb
+           -> do goto l_a3pb
+                 eval
+         GOTOFALSE l_a3pc
+           -> do gotofalse l_a3pc
+                 eval
+         SWITCH conds_a3pd
+           -> do switch conds_a3pd
+                 eval
+         i_a3pe -> error $! "Unsupported Instruction : " <> show i_a3pe
+genInstrs_a4Ad (Ins i_a3oU) l_a3oV = [(i_a3oU, l_a3oV)]
+genInstrs_a4Ad (Seq c1_a3oW c2_a3oX) l_a3oY
+  = genInstrs c1_a3oW l_a3oY ++ genInstrs c2_a3oX dummyLabel
+genInstrs_a4Ad (Lab l_a3oZ c_a3p0) _ = genInstrs c_a3p0 l_a3oZ
+initCode_a4Aj cam_a313
+  = Main.Code
+      {instrs = listArray (1, totalInstrs_a319) caminstrs_a316,
+       symbolTable = filteredEntries_a318, prevJump = [],
+       environment = VEmpty, stack = [], programCounter = 1}
+  where
+      instrsLabs_a314 = genInstrs cam_a313 dummyLabel
+      indexedinstrsLabs_a315 = zip instrsLabs_a314 [1 .. ]
+      caminstrs_a316 = map (fst . fst) indexedinstrsLabs_a315
+      entries_a317
+        = map
+            (\ ((_, l_a35v), idx_a35w) -> (l_a35v, idx_a35w))
+            indexedinstrsLabs_a315
+      filteredEntries_a318
+        = filter (\ (l_a35x, _) -> l_a35x /= dummyLabel) entries_a317
+      totalInstrs_a319 = length caminstrs_a316
+evaluate_a4Ok cam_a310
+  = val_a312
+  where
+      code_a311 = initCode cam_a310
+      val_a312 = S.evalState (runEvaluate eval) code_a311
+runEvaluate_a3V4 Evaluate {runEvaluate = runEvaluate_B1}
+  = runEvaluate_B1
+instrs_a3Qf Code {instrs = instrs_B1} = instrs_B1
+symbolTable_a3Qg Code {symbolTable = symbolTable_B1}
+  = symbolTable_B1
+prevJump_a3Qh Code {prevJump = prevJump_B1} = prevJump_B1
+environment_a3Qi Code {environment = environment_B1}
+  = environment_B1
+stack_a3Qj Code {stack = stack_B1} = stack_B1
+programCounter_a3Qk Code {programCounter = programCounter_B1}
+  = programCounter_B1
+$dOrd_a4Qu
+  = ghc-prim-0.5.3:GHC.Classes.C:Ord
+      $cp1Ord_a4OP
+      $ccompare_a4OR
+      $c<_a4PK
+      $c<=_a4PS
+      $c>_a4Q0
+      $c>=_a4Q8
+      $cmax_a4Qg
+      $cmin_a4Qo
+compare_a4OT a_a4bD b_a4bE
+  = case a_a4bD of
+      VInt a1_a4bF
+        -> case b_a4bE of
+             VInt b1_a4bG -> (a1_a4bF `compare` b1_a4bG)
+             _ -> LT
+      VBool a1_a4bH
+        -> case b_a4bE of
+             VInt {} -> GT
+             VBool b1_a4bI -> (a1_a4bH `compare` b1_a4bI)
+             _ -> LT
+      VEmpty
+        -> case (Main.$con2tag_Kvp8SGCZuVJEdqDNoKaFx0 b_a4bE) of {
+             b#_a4bJ
+               -> if (ghc-prim-0.5.3:GHC.Prim.tagToEnum#
+                        (b#_a4bJ ghc-prim-0.5.3:GHC.Prim.># 2#)) then
+                      LT
+                  else
+                      case b_a4bE of
+                        VEmpty -> EQ
+                        _ -> GT }
+      VPair a1_a4bK a2_a4bL
+        -> case (Main.$con2tag_Kvp8SGCZuVJEdqDNoKaFx0 b_a4bE) of {
+             b#_a4bM
+               -> if (ghc-prim-0.5.3:GHC.Prim.tagToEnum#
+                        (b#_a4bM ghc-prim-0.5.3:GHC.Prim.># 3#)) then
+                      LT
+                  else
+                      case b_a4bE of
+                        VPair b1_a4bN b2_a4bO
+                          -> case (compare a1_a4bK b1_a4bN) of
+                               LT -> LT
+                               EQ -> (a2_a4bL `compare` b2_a4bO)
+                               GT -> GT
+                        _ -> GT }
+      VCon a1_a4bP a2_a4bQ
+        -> case (Main.$con2tag_Kvp8SGCZuVJEdqDNoKaFx0 b_a4bE) of {
+             b#_a4bR
+               -> if (ghc-prim-0.5.3:GHC.Prim.tagToEnum#
+                        (b#_a4bR ghc-prim-0.5.3:GHC.Prim.<# 4#)) then
+                      GT
+                  else
+                      case b_a4bE of
+                        VCon b1_a4bS b2_a4bT
+                          -> case (compare a1_a4bP b1_a4bS) of
+                               LT -> LT
+                               EQ -> (a2_a4bQ `compare` b2_a4bT)
+                               GT -> GT
+                        _ -> LT }
+      VClosure a1_a4bU a2_a4bV
+        -> case b_a4bE of
+             VComb {} -> LT
+             VClosure b1_a4bW b2_a4bX
+               -> case (compare a1_a4bU b1_a4bW) of
+                    LT -> LT
+                    EQ -> (a2_a4bV `compare` b2_a4bX)
+                    GT -> GT
+             _ -> GT
+      VComb a1_a4bY
+        -> case b_a4bE of
+             VComb b1_a4bZ -> (a1_a4bY `compare` b1_a4bZ)
+             _ -> GT
+(<_a4PM) = ghc-prim-0.5.3:GHC.Classes.$dm< @(Val)
+(<=_a4PU) = ghc-prim-0.5.3:GHC.Classes.$dm<= @(Val)
+(>_a4Q2) = ghc-prim-0.5.3:GHC.Classes.$dm> @(Val)
+(>=_a4Qa) = ghc-prim-0.5.3:GHC.Classes.$dm>= @(Val)
+max_a4Qi = ghc-prim-0.5.3:GHC.Classes.$dmmax @(Val)
+min_a4Qq = ghc-prim-0.5.3:GHC.Classes.$dmmin @(Val)
+$dEq_a4R0 = ghc-prim-0.5.3:GHC.Classes.C:Eq $c==_a4Qw $c/=_a4QU
+(==_a4Qy) (VInt a1_a4c0) (VInt b1_a4c1) = ((a1_a4c0 == b1_a4c1))
+(==_a4Qy) (VBool a1_a4c2) (VBool b1_a4c3) = ((a1_a4c2 == b1_a4c3))
+(==_a4Qy) (VEmpty) (VEmpty) = True
+(==_a4Qy) (VPair a1_a4c4 a2_a4c5) (VPair b1_a4c6 b2_a4c7)
+  = (((a1_a4c4 == b1_a4c6)) && ((a2_a4c5 == b2_a4c7)))
+(==_a4Qy) (VCon a1_a4c8 a2_a4c9) (VCon b1_a4ca b2_a4cb)
+  = (((a1_a4c8 == b1_a4ca)) && ((a2_a4c9 == b2_a4cb)))
+(==_a4Qy) (VClosure a1_a4cc a2_a4cd) (VClosure b1_a4ce b2_a4cf)
+  = (((a1_a4cc == b1_a4ce)) && ((a2_a4cd == b2_a4cf)))
+(==_a4Qy) (VComb a1_a4cg) (VComb b1_a4ch) = ((a1_a4cg == b1_a4ch))
+(==_a4Qy) _ _ = False
+(/=_a4QW) = ghc-prim-0.5.3:GHC.Classes.$dm/= @(Val)
+$dShow_a4Sw
+  = GHC.Show.C:Show $cshowsPrec_a4R2 $cshow_a4Si $cshowList_a4Sq
+showsPrec_a4R5
+  a_a4ci
+  (Code b1_a4cj b2_a4ck b3_a4cl b4_a4cm b5_a4cn b6_a4co)
+  = showParen
+      (a_a4ci >= 11)
+      ((.)
+         (showString "Code {")
+         ((.)
+            (showString "instrs = ")
+            ((.)
+               (showsPrec 0 b1_a4cj)
+               ((.)
+                  GHC.Show.showCommaSpace
+                  ((.)
+                     (showString "symbolTable = ")
+                     ((.)
+                        (showsPrec 0 b2_a4ck)
+                        ((.)
+                           GHC.Show.showCommaSpace
+                           ((.)
+                              (showString "prevJump = ")
+                              ((.)
+                                 (showsPrec 0 b3_a4cl)
+                                 ((.)
+                                    GHC.Show.showCommaSpace
+                                    ((.)
+                                       (showString "environment = ")
+                                       ((.)
+                                          (showsPrec 0 b4_a4cm)
+                                          ((.)
+                                             GHC.Show.showCommaSpace
+                                             ((.)
+                                                (showString "stack = ")
+                                                ((.)
+                                                   (showsPrec 0 b5_a4cn)
+                                                   ((.)
+                                                      GHC.Show.showCommaSpace
+                                                      ((.)
+                                                         (showString "programCounter = ")
+                                                         ((.)
+                                                            (showsPrec 0 b6_a4co)
+                                                            (showString "}")))))))))))))))))))
+show_a4Sk = GHC.Show.$dmshow @(Code)
+showList_a4Ss = GHC.Show.$dmshowList @(Code)
+$dFunctor_a4Ui = GHC.Base.C:Functor $cfmap_a4Sy $c<$_a4Tt
+fmap_a4SC
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @((a_a3XQ -> b_a3XR)
+        -> S.StateT Code Data.Functor.Identity.Identity a_a3XQ
+           -> S.StateT Code Data.Functor.Identity.Identity b_a3XR)
+      @((a_a3XQ -> b_a3XR) -> Evaluate a_a3XQ -> Evaluate b_a3XR)
+      fmap ::
+      forall (a_a3XQ :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep)
+             (b_a3XR :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      (a_a3XQ -> b_a3XR) -> Evaluate a_a3XQ -> Evaluate b_a3XR
+(<$_a4Tx)
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(a_a3XW
+        -> S.StateT Code Data.Functor.Identity.Identity b_a3XX
+           -> S.StateT Code Data.Functor.Identity.Identity a_a3XW)
+      @(a_a3XW -> Evaluate b_a3XX -> Evaluate a_a3XW)
+      (<$) ::
+      forall (a_a3XW :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep)
+             (b_a3XX :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      a_a3XW -> Evaluate b_a3XX -> Evaluate a_a3XW
+$dApplicative_a4YN
+  = GHC.Base.C:Applicative
+      $cp1Applicative_a4Um
+      $cpure_a4Uo
+      $c<*>_a4UY
+      $cliftA2_a4VT
+      $c*>_a4X9
+      $c<*_a4XY
+pure_a4Ur
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(a_a48R -> S.StateT Code Data.Functor.Identity.Identity a_a48R)
+      @(a_a48R -> Evaluate a_a48R)
+      pure ::
+      forall (a_a48R :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      a_a48R -> Evaluate a_a48R
+(<*>_a4V2)
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(S.StateT Code Data.Functor.Identity.Identity (a_a48V -> b_a48W)
+        -> S.StateT Code Data.Functor.Identity.Identity a_a48V
+           -> S.StateT Code Data.Functor.Identity.Identity b_a48W)
+      @(Evaluate (a_a48V -> b_a48W)
+        -> Evaluate a_a48V -> Evaluate b_a48W)
+      (<*>) ::
+      forall (a_a48V :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep)
+             (b_a48W :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      Evaluate (a_a48V -> b_a48W) -> Evaluate a_a48V -> Evaluate b_a48W
+liftA2_a4VY
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @((a_a491 -> b_a492 -> c_a493)
+        -> S.StateT Code Data.Functor.Identity.Identity a_a491
+           -> S.StateT Code Data.Functor.Identity.Identity b_a492
+              -> S.StateT Code Data.Functor.Identity.Identity c_a493)
+      @((a_a491 -> b_a492 -> c_a493)
+        -> Evaluate a_a491 -> Evaluate b_a492 -> Evaluate c_a493)
+      GHC.Base.liftA2 ::
+      forall (a_a491 :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep)
+             (b_a492 :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep)
+             (c_a493 :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      (a_a491 -> b_a492 -> c_a493)
+      -> Evaluate a_a491 -> Evaluate b_a492 -> Evaluate c_a493
+(*>_a4Xd)
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(S.StateT Code Data.Functor.Identity.Identity a_a499
+        -> S.StateT Code Data.Functor.Identity.Identity b_a49a
+           -> S.StateT Code Data.Functor.Identity.Identity b_a49a)
+      @(Evaluate a_a499 -> Evaluate b_a49a -> Evaluate b_a49a)
+      (*>) ::
+      forall (a_a499 :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep)
+             (b_a49a :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      Evaluate a_a499 -> Evaluate b_a49a -> Evaluate b_a49a
+(<*_a4Y2)
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(S.StateT Code Data.Functor.Identity.Identity a_a49f
+        -> S.StateT Code Data.Functor.Identity.Identity b_a49g
+           -> S.StateT Code Data.Functor.Identity.Identity a_a49f)
+      @(Evaluate a_a49f -> Evaluate b_a49g -> Evaluate a_a49f)
+      (<*) ::
+      forall (a_a49f :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep)
+             (b_a49g :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      Evaluate a_a49f -> Evaluate b_a49g -> Evaluate a_a49f
+$dMonad_a51N
+  = GHC.Base.C:Monad
+      $cp1Monad_a4YR $c>>=_a4YT $c>>_a4ZO $creturn_a50D $cfail_a51d
+(>>=_a4YX)
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(S.StateT Code Data.Functor.Identity.Identity a_a4ai
+        -> (a_a4ai -> S.StateT Code Data.Functor.Identity.Identity b_a4aj)
+           -> S.StateT Code Data.Functor.Identity.Identity b_a4aj)
+      @(Evaluate a_a4ai
+        -> (a_a4ai -> Evaluate b_a4aj) -> Evaluate b_a4aj)
+      (>>=) ::
+      forall (a_a4ai :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep)
+             (b_a4aj :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      Evaluate a_a4ai -> (a_a4ai -> Evaluate b_a4aj) -> Evaluate b_a4aj
+(>>_a4ZS)
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(S.StateT Code Data.Functor.Identity.Identity a_a4ao
+        -> S.StateT Code Data.Functor.Identity.Identity b_a4ap
+           -> S.StateT Code Data.Functor.Identity.Identity b_a4ap)
+      @(Evaluate a_a4ao -> Evaluate b_a4ap -> Evaluate b_a4ap)
+      (>>) ::
+      forall (a_a4ao :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep)
+             (b_a4ap :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      Evaluate a_a4ao -> Evaluate b_a4ap -> Evaluate b_a4ap
+return_a50G
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(a_a4au -> S.StateT Code Data.Functor.Identity.Identity a_a4au)
+      @(a_a4au -> Evaluate a_a4au)
+      return ::
+      forall (a_a4au :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      a_a4au -> Evaluate a_a4au
+fail_a51g
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(String -> S.StateT Code Data.Functor.Identity.Identity a_a4ay)
+      @(String -> Evaluate a_a4ay)
+      fail ::
+      forall (a_a4ay :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      String -> Evaluate a_a4ay
+$dMonadState_a53c
+  = Control.Monad.State.Class.C:MonadState
+      $cp1MonadState_a51R $cget_a51T $cput_a529 $cstate_a52v
+get_a51V
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(S.StateT Code Data.Functor.Identity.Identity Code)
+      @(Evaluate Code)
+      S.get ::
+      Evaluate Code
+put_a52b
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @(Code -> S.StateT Code Data.Functor.Identity.Identity ())
+      @(Code -> Evaluate ())
+      S.put ::
+      Code -> Evaluate ()
+state_a52y
+  = ghc-prim-0.5.3:GHC.Prim.coerce
+      @((Code -> (,) a_a4bl Code)
+        -> S.StateT Code Data.Functor.Identity.Identity a_a4bl)
+      @((Code -> (,) a_a4bl Code) -> Evaluate a_a4bl)
+      S.state ::
+      forall (a_a4bl :: TYPE ghc-prim-0.5.3:GHC.Types.LiftedRep).
+      (Code -> (,) a_a4bl Code) -> Evaluate a_a4bl
+$dShow_a54g
+  = GHC.Show.C:Show $cshowsPrec_a53g $cshow_a53m $cshowList_a54a
+showsPrec_a53i = GHC.Show.$dmshowsPrec @(Val)
+show_a53o (VInt i_a30R) = show i_a30R
+show_a53o (VBool b_a30S) = show b_a30S
+show_a53o VEmpty = "()"
+show_a53o (VPair v1_a30T v2_a30U)
+  = "(" <> show v1_a30T <> ", " <> show v2_a30U <> ")"
+show_a53o (VCon t_a30V v_a30W)
+  = "(" <> show t_a30V <> " : " <> show v_a30W <> ")"
+show_a53o (VClosure v_a30X l_a30Y)
+  = "[" <> show v_a30X <> " : " <> show l_a30Y <> "]"
+show_a53o (VComb l_a30Z) = "[" <> show l_a30Z <> "]"
+showList_a54c = GHC.Show.$dmshowList @(Val)
+:Main.main = GHC.TopHandler.runMainIO main

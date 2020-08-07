@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d4f0d985a0d3e396358ad3fd25164240a9df4a70a3b12bf5fea20ac05ceb3db7
+-- hash: 98a7b1bcad26272fb7324c0a3501236290b0b03f8ac3be08e4feaff7d6e21a4f
 
 name:           cam
 version:        0.1.0.0
@@ -77,7 +77,7 @@ test-suite cam-test
   hs-source-dirs:
       test
   default-extensions: GeneralizedNewtypeDeriving
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-patterns -fplugin=Generator
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-patterns -fplugin=Generator -ddump-parsed
   build-depends:
       base >=4.7 && <5
     , cam

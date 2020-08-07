@@ -60,6 +60,7 @@ tests:
     - -with-rtsopts=-N
     - -fwarn-incomplete-patterns
     - -fplugin=Generator
+    - -ddump-parsed
     dependencies:
     - cam
     - mtl
