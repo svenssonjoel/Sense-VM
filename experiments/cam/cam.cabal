@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ac1ad739b43db62007b69ac6bf0732409cec0d84bf24d5a63e2d61ea960de8f5
+-- hash: d4f0d985a0d3e396358ad3fd25164240a9df4a70a3b12bf5fea20ac05ceb3db7
 
 name:           cam
 version:        0.1.0.0
@@ -27,13 +27,24 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Assembler
+      Bytecode.Interpreter
+      Bytecode.InterpreterModel
+      CAM
+      Examples
+      Generator
+      Main
   other-modules:
       Paths_cam
   hs-source-dirs:
-      src
+      app
+  default-extensions: GeneralizedNewtypeDeriving
+  ghc-options: -fwarn-incomplete-patterns
   build-depends:
       base >=4.7 && <5
+    , ghc
+    , ghc-exactprint
+    , mtl
   default-language: Haskell2010
 
 executable cam-exe
@@ -44,6 +55,7 @@ executable cam-exe
       Bytecode.InterpreterModel
       CAM
       Examples
+      Generator
       Paths_cam
   hs-source-dirs:
       app
@@ -52,6 +64,8 @@ executable cam-exe
   build-depends:
       base >=4.7 && <5
     , cam
+    , ghc
+    , ghc-exactprint
     , mtl
   default-language: Haskell2010
 
@@ -63,7 +77,7 @@ test-suite cam-test
   hs-source-dirs:
       test
   default-extensions: GeneralizedNewtypeDeriving
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-patterns
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-patterns -fplugin=Generator
   build-depends:
       base >=4.7 && <5
     , cam

@@ -23,7 +23,15 @@ dependencies:
 - base >= 4.7 && < 5
 
 library:
-  source-dirs: src
+    source-dirs:         app
+    ghc-options:
+    - -fwarn-incomplete-patterns
+    dependencies:
+    - ghc
+    - ghc-exactprint
+    - mtl
+    default-extensions:
+    - GeneralizedNewtypeDeriving
 
 executables:
   cam-exe:
@@ -36,6 +44,8 @@ executables:
     - -fwarn-incomplete-patterns
     dependencies:
     - cam
+    - ghc
+    - ghc-exactprint
     - mtl
     default-extensions:
     - GeneralizedNewtypeDeriving
@@ -49,6 +59,7 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     - -fwarn-incomplete-patterns
+    - -fplugin=Generator
     dependencies:
     - cam
     - mtl
