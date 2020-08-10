@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ad12bfc96e1b9d26fe59b6a9ef4fa4e05a46eb21eee1ff7f37dc99120bffafea
+-- hash: ff435069e7770b662cd980066201e0e5ee8eb175dbd9e6fa697e9e01cadaf3c5
 
 name:           cam
 version:        0.1.0.0
@@ -32,7 +32,8 @@ library
       Bytecode.InterpreterModel
       CAM
       Examples
-      Generator
+      Generate.Generator
+      Generate.Parser
       Main
   other-modules:
       Paths_cam
@@ -54,7 +55,8 @@ executable cam-exe
       Bytecode.InterpreterModel
       CAM
       Examples
-      Generator
+      Generate.Generator
+      Generate.Parser
       Paths_cam
   hs-source-dirs:
       app
