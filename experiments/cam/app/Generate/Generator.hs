@@ -34,6 +34,70 @@ data Lang
 lower :: HsModule -> Lang
 lower = undefined
 
+{-
+
+data HsModule =
+  HsModule _ _ _ _ [HsDecl]
+
+data HsDecl = ...
+    .
+    HsTypeSig _ [HsName] HsQualType
+    HsFunBin  [HsMatch]
+    .
+    .
+
+data HsMatch =
+  HsMatch SrcLoc
+    (HsIdent <function name>)
+    [HsPat] -- arguments; HsPat is extremely rich we need to disqualify it
+     HsRhs   -- the function body
+    [HsDecl] -- not sure what this is doing
+
+data HsRhs =
+    HsUnGuardedRhs HsExp
+  | HsGuardedRhss  [HsGuardedRhs] -- maybe we should ban guards to reduce complexity
+
+data HsExp
+        = HsVar HsQName                 -- ^ variable
+        | HsCon HsQName                 -- ^ data constructor
+        | HsLit HsLiteral               -- ^ literal constant
+        | HsInfixApp HsExp HsQOp HsExp  -- ^ infix application
+        | HsApp HsExp HsExp             -- ^ ordinary application
+        | HsNegApp HsExp                -- ^ negation expression @-@ /exp/
+        | HsLambda SrcLoc [HsPat] HsExp -- ^ lambda expression
+        | HsLet [HsDecl] HsExp          -- ^ local declarations with @let@
+        | HsIf HsExp HsExp HsExp        -- ^ @if@ /exp/ @then@ /exp/ @else@ /exp/
+        | HsCase HsExp [HsAlt]          -- ^ @case@ /exp/ @of@ /alts/
+        | HsDo [HsStmt]                 -- ^ @do@-expression:
+                                        -- the last statement in the list
+                                        -- should be an expression.
+        | HsTuple [HsExp]               -- ^ tuple expression
+        | HsList [HsExp]                -- ^ list expression
+        | HsParen HsExp                 -- ^ parenthesized expression
+        | HsLeftSection HsExp HsQOp     -- ^ left section @(@/exp/ /qop/@)@
+        | HsRightSection HsQOp HsExp    -- ^ right section @(@/qop/ /exp/@)@
+        | HsRecConstr HsQName [HsFieldUpdate]
+                                        -- ^ record construction expression
+        | HsRecUpdate HsExp [HsFieldUpdate]
+                                        -- ^ record update expression
+        | HsEnumFrom HsExp              -- ^ unbounded arithmetic sequence,
+                                        -- incrementing by 1
+        | HsEnumFromTo HsExp HsExp      -- ^ bounded arithmetic sequence,
+                                        -- incrementing by 1
+        | HsEnumFromThen HsExp HsExp    -- ^ unbounded arithmetic sequence,
+                                        -- with first two elements given
+        | HsEnumFromThenTo HsExp HsExp HsExp
+                                        -- ^ bounded arithmetic sequence,
+                                        -- with first two elements given
+        | HsListComp HsExp [HsStmt]     -- ^ list comprehension
+        | HsExpTypeSig SrcLoc HsExp HsQualType
+                                        -- ^ expression type signature
+        | HsAsPat HsName HsExp          -- ^ patterns only
+        | HsWildCard                    -- ^ patterns only
+        | HsIrrPat HsExp                -- ^ patterns only
+
+-}
+
 -- parseInterpreter = do
 --   interpreter <- readFile location
 --   let result = case parseModule interpreter of
