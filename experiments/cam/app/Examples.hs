@@ -25,7 +25,9 @@ module Examples where
 import Bytecode.InterpreterModel
 import CAM
 
-example0 = Sys $ Sys2 Minus (Sys $ LInt 5) (Sys $ LInt 4)
+example0 =
+  Let (PatVar "foo") (Sys $ Sys2 Minus (Sys $ LInt 5) (Sys $ LInt 4))
+  (Var "foo")
 
 example1 = Lam (PatVar "x") (Sys $ Sys2 Plus (Sys $ LInt 3) (Var "x"))
 

@@ -20,14 +20,16 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
-{-# LANGUAGE MultiParamTypeClasses #-}
-module Bytecode.InterpreterModel where
+module Bytecode.InterpreterWriter where
 
 import CAM
 import Data.List (find)
 import GHC.Arr
-import Control.Monad.State.Strict(MonadState, StateT (..), State,
-                                  evalState, get, put, gets, modify)
+import Control.Monad.State.Strict(MonadState, State, evalState,
+                                  get, put, gets, modify)
+import Control.Monad.Writer.Lazy
+
+import qualified Data.DList as DL
 
 {-
 NOTE: This is not the actual "byte"code interpreter.
@@ -54,15 +56,18 @@ data Code = Code { instrs :: Array Index Instruction
                  , programCounter :: Index
                  } deriving Show
 
+data Stmt
+
+type FuncBody = DL.DList Stmt
+
 newtype Evaluate a =
   Evaluate
-    { runEvaluate :: State Code a
-    }
-  deriving (Functor, Applicative, Monad)
-
-instance MonadState Code Evaluate where
-  get   = Evaluate (StateT (\s -> return (s,s)))
-  put s = Evaluate (StateT (\_ -> return ((),s)))
+  {
+    runEvaluate :: WriterT FuncBody (State Code) a
+  }
+  deriving (Functor, Applicative, Monad
+           , MonadState Code
+           , MonadWriter FuncBody)
 
 -- Val is basically Weak Head Normal Form
 data Val = VInt  Int  -- constants s(0)
@@ -94,7 +99,7 @@ evaluate :: CAM -> Val
 evaluate cam = val
   where
     code = initCode cam
-    val  = evalState (runEvaluate eval) code
+    (val, codegen) = evalState (runWriterT $ runEvaluate eval) code
 
 initCode :: CAM -> Code
 initCode cam = Code { instrs = listArray (1, totalInstrs) caminstrs

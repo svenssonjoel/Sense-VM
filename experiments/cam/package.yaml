@@ -27,6 +27,7 @@ library:
     ghc-options:
     - -fwarn-incomplete-patterns
     dependencies:
+    - dlist
     - haskell-src
     - mtl
     default-extensions:
@@ -43,6 +44,7 @@ executables:
     - -fwarn-incomplete-patterns
     dependencies:
     - cam
+    - dlist
     - haskell-src
     - mtl
     default-extensions:
@@ -59,6 +61,5 @@ tests:
     - -fwarn-incomplete-patterns
     dependencies:
     - cam
-    - mtl
     default-extensions:
     - GeneralizedNewtypeDeriving

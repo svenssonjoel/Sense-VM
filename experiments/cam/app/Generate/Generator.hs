@@ -29,7 +29,21 @@ import Language.Haskell.Pretty
 import Language.Haskell.Syntax
 
 
-data Lang
+type FuncName = String
+
+data TypeSig
+
+data Constrs
+
+data Stmt
+
+data Body = Stmt Stmt
+          | Seq Lang Lang
+
+data Func = Func FuncName TypeSig Body
+
+data Lang = Lang [Func] [Constrs]
+
 
 lower :: HsModule -> Lang
 lower = undefined
@@ -96,7 +110,22 @@ data HsExp
         | HsWildCard                    -- ^ patterns only
         | HsIrrPat HsExp                -- ^ patterns only
 
+
+From do expression
+data HsStmt
+        = HsGenerator SrcLoc HsPat HsExp
+                                -- ^ a generator /pat/ @<-@ /exp/
+        | HsQualifier HsExp     -- ^ an /exp/ by itself: in a @do@-expression,
+                                -- an action whose result is discarded;
+                                -- in a list comprehension, a guard expression
+        | HsLetStmt [HsDecl]    -- ^ local bindings
+
+
+data HsAlt =
+  HsAlt SrcLoc HsPat HsGuardedAlts [HsDecl]
 -}
+
+-- location = "/Users/abhiroopsarkar/C/Sense-VM/experiments/cam/app/Bytecode/InterpreterModel.hs"
 
 -- parseInterpreter = do
 --   interpreter <- readFile location
@@ -110,12 +139,12 @@ data HsExp
 --                          _           -> []
 --                        ) allDecls
 --   let y   = filter (\a -> case a of
---                             (HsTypeSig _ [(HsIdent "loadi")] _) -> True
+--                             (HsTypeSig _ [(HsIdent "unaryop")] _) -> True
 --                             _           -> False
 --                        ) allDecls
 
 --   putStrLn $ show $ filter (\r -> case r of
---                                     (HsMatch _ (HsIdent "loadi") _ _ _) -> True
+--                                     (HsMatch _ (HsIdent "unaryop") _ _ _) -> True
 --                                     _ -> False
 --                                ) z
 --   putStrLn $ show y
