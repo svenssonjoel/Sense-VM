@@ -23,6 +23,7 @@
 module Examples where
 
 import Bytecode.InterpreterModel
+import Bytecode.InterpreterHelper
 import CAM
 
 example0 =

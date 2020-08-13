@@ -3,7 +3,28 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: language-c99-0.1.2@sha256:6c9022378c7ed57d080fe41442066a5f2657347fd02a07ad291bbf41d71ab954,1587
+    pantry-tree:
+      size: 399
+      sha256: 53d202a7489f2501c633e5c1f4d6a63deed004df1bec36d3ce29d54388c4a619
+  original:
+    hackage: language-c99-0.1.2@sha256:6c9022378c7ed57d080fe41442066a5f2657347fd02a07ad291bbf41d71ab954,1587
+- completed:
+    hackage: language-c99-simple-0.1.2@sha256:5b522616fa22a0909250d56a0632f1f1cae1c38d585149e13eeb809103af9543,1540
+    pantry-tree:
+      size: 574
+      sha256: 1d297b46c78e2a498f7828bddc794d8355656273f7334f8ab27452ccfd28d5be
+  original:
+    hackage: language-c99-simple-0.1.2@sha256:5b522616fa22a0909250d56a0632f1f1cae1c38d585149e13eeb809103af9543,1540
+- completed:
+    hackage: language-c99-util-0.1.1@sha256:480adee2ba3045d04305be5362be991b1814faf58cfd7af1f845d0fc9dbcf3a7,1177
+    pantry-tree:
+      size: 489
+      sha256: 3a5e1387e9b073dad4f51fa749fd4c33e2abe31566b63a120a38a7f88d809493
+  original:
+    hackage: language-c99-util-0.1.1@sha256:480adee2ba3045d04305be5362be991b1814faf58cfd7af1f845d0fc9dbcf3a7,1177
 snapshots:
 - completed:
     size: 497078

@@ -20,33 +20,64 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
+
 module Generate.Generator where
 
 import Control.Monad
+
+import Language.C99.Simple.AST
 
 import Language.Haskell.Parser
 import Language.Haskell.Pretty
 import Language.Haskell.Syntax
 
 
-type FuncName = String
+translExpr :: HsExp -> Expr
+translExpr (HsVar qname) = Ident $ translQName qname
+translExpr (HsCon qname) = Ident ""
+translExpr (HsLit lit)   = translLit lit
+translExpr (HsInfixApp e1 qop e2) =
+  infixapp qop [translExpr e1, translExpr e2]
+translExpr (HsApp e1 e2) =
+  Funcall (translExpr e1) [translExpr e2]
+translExpr (HsNegApp _) = unsupported "Negation application"
 
-data TypeSig
-
-data Constrs
-
-data Stmt
-
-data Body = Stmt Stmt
-          | Seq Lang Lang
-
-data Func = Func FuncName TypeSig Body
-
-data Lang = Lang [Func] [Constrs]
+infixapp :: HsQOp -> [Expr] -> Expr
+infixapp (HsQVarOp (UnQual (HsSymbol "+"))) (e1:e2:_) =
+  BinaryOp Add e1 e2
 
 
-lower :: HsModule -> Lang
-lower = undefined
+translLit :: HsLiteral -> Expr
+translLit (HsChar char) = Ident [char]
+translLit (HsString string) = Ident string
+translLit (HsInt i) = LitInt i
+translLit (HsFrac r) = LitDouble $ fromRational r
+translLit (HsCharPrim c) = Ident [c]
+translLit (HsStringPrim s) = Ident s
+translLit (HsIntPrim i) = LitInt i
+translLit (HsFloatPrim r) = LitFloat $ fromRational r
+translLit (HsDoublePrim r) = LitDouble $ fromRational r
+
+translQName :: HsQName -> Ident
+translQName (Qual _ _) = unsupported "Qualified names"
+translQName (UnQual hsname) = translHsName hsname
+translQName (Special special) = translSpecial special
+
+translHsName :: HsName -> Ident
+translHsName (HsIdent s) = s
+translHsName (HsSymbol s) = unsupported "Symbols for variable names"
+
+translSpecial :: HsSpecialCon -> Ident
+translSpecial HsUnitCon  = "()"
+translSpecial _ = unsupported "Other special constructors"
+
+unsupported :: String -> a
+unsupported x = error $ x <> " not supported"
+
+
+
+
+
 
 {-
 
@@ -56,7 +87,8 @@ data HsModule =
 data HsDecl = ...
     .
     HsTypeSig _ [HsName] HsQualType
-    HsFunBin  [HsMatch]
+    HsFunBind  [HsMatch]             -- functions with args
+    HsPatBind _ HsPat HsRhs [HsDecl] -- functions with 0 args
     .
     .
 
@@ -125,26 +157,32 @@ data HsAlt =
   HsAlt SrcLoc HsPat HsGuardedAlts [HsDecl]
 -}
 
--- location = "/Users/abhiroopsarkar/C/Sense-VM/experiments/cam/app/Bytecode/InterpreterModel.hs"
+location = "/Users/abhiroopsarkar/C/Sense-VM/experiments/cam/app/Bytecode/InterpreterModel.hs"
 
--- parseInterpreter = do
---   interpreter <- readFile location
---   let result = case parseModule interpreter of
---                  ParseOk a -> a
---                  ParseFailed srcloc s -> error $ show srcloc
---   let (HsModule _ _ _ importDecls allDecls) = result
---   let foo = prettyPrint result
---   let z   = join $ map (\a -> case a of
---                          HsFunBind matches -> matches
---                          _           -> []
---                        ) allDecls
---   let y   = filter (\a -> case a of
---                             (HsTypeSig _ [(HsIdent "unaryop")] _) -> True
---                             _           -> False
---                        ) allDecls
+parseInterpreter = do
+  interpreter <- readFile location
+  let result = case parseModule interpreter of
+                 ParseOk a -> a
+                 ParseFailed srcloc s -> error $ show srcloc
+  let (HsModule _ _ _ importDecls allDecls) = result
+  let foo = prettyPrint result
+  let z   = join $ map (\a -> case a of
+                         HsFunBind matches -> matches
+                         _           -> []
+                       ) allDecls
+  let r   = filter (\a -> case a of
+                            HsPatBind _ (HsPVar (HsIdent "push")) _ _ -> True
+                            _           -> False
+                   ) allDecls
 
---   putStrLn $ show $ filter (\r -> case r of
---                                     (HsMatch _ (HsIdent "unaryop") _ _ _) -> True
---                                     _ -> False
---                                ) z
---   putStrLn $ show y
+  let y   = filter (\a -> case a of
+                            (HsTypeSig _ [(HsIdent "push")] _) -> True
+                            _           -> False
+                       ) allDecls
+
+  -- putStrLn $ show $ filter (\r -> case r of
+  --                                   (HsMatch _ (HsIdent "push") _ _ _) -> True
+  --                                   _ -> False
+  --                              ) z
+  putStrLn $ show y
+  print r

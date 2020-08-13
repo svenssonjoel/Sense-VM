@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 074a52a2761ad99fc911f3ad3e180dba6e25b37ba888ebd3b50a24852ba5c133
+-- hash: 55a3077a337fe8a088cc196c53b819f7b60777d2236ee0478c0ae8f8b8fe18c8
 
 name:           cam
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       Assembler
       Bytecode.Interpreter
+      Bytecode.InterpreterHelper
       Bytecode.InterpreterModel
       Bytecode.InterpreterWriter
       CAM
@@ -46,6 +47,8 @@ library
       base >=4.7 && <5
     , dlist
     , haskell-src
+    , language-c99
+    , language-c99-simple
     , mtl
   default-language: Haskell2010
 
@@ -54,6 +57,7 @@ executable cam-exe
   other-modules:
       Assembler
       Bytecode.Interpreter
+      Bytecode.InterpreterHelper
       Bytecode.InterpreterModel
       Bytecode.InterpreterWriter
       CAM
@@ -70,6 +74,8 @@ executable cam-exe
     , cam
     , dlist
     , haskell-src
+    , language-c99
+    , language-c99-simple
     , mtl
   default-language: Haskell2010
 
@@ -81,8 +87,9 @@ test-suite cam-test
   hs-source-dirs:
       test
   default-extensions: GeneralizedNewtypeDeriving
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-patterns
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-patterns -ddump-simpl -dsuppress-idinfo -dsuppress-coercions -dsuppress-type-applications -dsuppress-uniques -dsuppress-module-prefixes
   build-depends:
       base >=4.7 && <5
     , cam
+    , mtl
   default-language: Haskell2010

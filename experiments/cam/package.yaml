@@ -29,6 +29,8 @@ library:
     dependencies:
     - dlist
     - haskell-src
+    - language-c99
+    - language-c99-simple
     - mtl
     default-extensions:
     - GeneralizedNewtypeDeriving
@@ -45,6 +47,8 @@ executables:
     dependencies:
     - cam
     - dlist
+    - language-c99
+    - language-c99-simple
     - haskell-src
     - mtl
     default-extensions:
@@ -59,7 +63,15 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     - -fwarn-incomplete-patterns
+    - -ddump-simpl
+    - -dsuppress-idinfo
+    - -dsuppress-coercions
+    - -dsuppress-type-applications
+    - -dsuppress-uniques
+    - -dsuppress-module-prefixes
+
     dependencies:
     - cam
+    - mtl
     default-extensions:
     - GeneralizedNewtypeDeriving

@@ -39,7 +39,11 @@ packages:
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
-# extra-deps: []
+extra-deps:
+  - language-c99-0.1.2@sha256:6c9022378c7ed57d080fe41442066a5f2657347fd02a07ad291bbf41d71ab954,1587
+  - language-c99-simple-0.1.2@sha256:5b522616fa22a0909250d56a0632f1f1cae1c38d585149e13eeb809103af9543,1540
+  - language-c99-util-0.1.1@sha256:480adee2ba3045d04305be5362be991b1814faf58cfd7af1f845d0fc9dbcf3a7,1177
+
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

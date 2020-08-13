@@ -20,14 +20,13 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
-{-# LANGUAGE MultiParamTypeClasses #-}
 module Bytecode.InterpreterModel where
 
+import Bytecode.InterpreterHelper
 import CAM
 import Data.List (find)
 import GHC.Arr
-import Control.Monad.State.Strict(MonadState, StateT (..), State,
-                                  evalState, get, put, gets, modify)
+import Control.Monad.State.Strict(evalState, gets, modify)
 
 {-
 NOTE: This is not the actual "byte"code interpreter.
@@ -38,55 +37,6 @@ NOTE 2: Efficiency of the data structures like symbol table
 doesn't matter because we will generate more efficient C types
 -}
 
-type Stack = [Val]
-
-type Environment = Val -- the environment register
-
-type Index = Int
-
-type SymbolTable = [(Label, Index)]
-
-data Code = Code { instrs :: Array Index Instruction
-                 , symbolTable :: SymbolTable
-                 , prevJump    :: [Index]
-                 , environment :: Environment
-                 , stack       :: Stack
-                 , programCounter :: Index
-                 } deriving Show
-
-newtype Evaluate a =
-  Evaluate
-    { runEvaluate :: State Code a
-    }
-  deriving (Functor, Applicative, Monad)
-
-instance MonadState Code Evaluate where
-  get   = Evaluate (StateT (\s -> return (s,s)))
-  put s = Evaluate (StateT (\_ -> return ((),s)))
-
--- Val is basically Weak Head Normal Form
-data Val = VInt  Int  -- constants s(0)
-         | VBool Bool -- constants s(0)
-         | VEmpty     -- empty tuple
-         | VPair Val Val -- Pair
-         | VCon Tag Val  -- first arg is the tag second is value with tag
-         | VClosure Val Label -- closure; Val is the environment
-         | VComb Label        -- closure of a combinator; no free variables
-         deriving (Ord, Eq)
-
--- using Hinze's notation
-instance Show Val where
-  show (VInt i)  = show i
-  show (VBool b) = show b
-  show  VEmpty   = "()"
-  show (VPair v1 v2) =
-    "(" <> show v1 <> ", " <> show v2 <> ")"
-  show (VCon t v) =
-    "(" <> show t <> " : " <> show v  <> ")"
-  show (VClosure v l) =
-    "[" <> show v <> " : " <> show l  <> "]"
-  show (VComb l) =
-    "[" <> show l <> "]"
 
 -- Take a sequence of stack machine instructions
 -- and evaluate them to their normal form
@@ -162,24 +112,6 @@ eval = do
       do { switch conds; eval; }
     i ->
       error ("Unsupported Instruction : " <> show i)
-
--- Symbol Table operations
-
--- In this case we have a common error message
--- because this operation is only on a symbol table
-(~>) :: SymbolTable -> Label -> Index
-(~>) [] _ = error "Label missing in symbol table"
-(~>) ((label,idx):st) l
-  | l == label = idx
-  | otherwise  = st ~> l
-
-put :: SymbolTable -> Label -> Index -> SymbolTable
-put st l idx = (l,idx) : st
-
-
-emptyST :: SymbolTable
-emptyST = []
-
 
 -- Code operations
 
