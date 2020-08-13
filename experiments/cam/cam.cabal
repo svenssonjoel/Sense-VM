@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8736a4f5fc21582947dbc2f9889a79f8bf86f98638493b3b55b13ba055066875
+-- hash: f75af27f62f1de6ab60b903263d5b29668a5322efb67bc5e1efcf610af8f5683
 
 name:           cam
 version:        0.1.0.0
@@ -28,8 +28,8 @@ source-repository head
 library
   exposed-modules:
       Assembler
+      Bytecode.HelperTH
       Bytecode.Interpreter
-      Bytecode.InterpreterHelper
       Bytecode.InterpreterModel
       Bytecode.InterpreterTH
       Bytecode.InterpreterWriter
@@ -59,8 +59,8 @@ executable cam-exe
   main-is: Main.hs
   other-modules:
       Assembler
+      Bytecode.HelperTH
       Bytecode.Interpreter
-      Bytecode.InterpreterHelper
       Bytecode.InterpreterModel
       Bytecode.InterpreterTH
       Bytecode.InterpreterWriter
