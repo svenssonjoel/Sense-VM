@@ -32,6 +32,8 @@ library:
     - language-c99
     - language-c99-simple
     - mtl
+    - template-haskell
+    - th-desugar
     default-extensions:
     - GeneralizedNewtypeDeriving
 
@@ -51,6 +53,8 @@ executables:
     - language-c99-simple
     - haskell-src
     - mtl
+    - template-haskell
+    - th-desugar
     default-extensions:
     - GeneralizedNewtypeDeriving
 

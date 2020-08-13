@@ -20,14 +20,18 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-module Bytecode.InterpreterModel where
+module Bytecode.InterpreterTH where
 
+import Bytecode.HelperTH
 import CAM
 import Data.List (find)
 import GHC.Arr
 import Control.Monad.State.Strict(MonadState, StateT (..), State,
                                   evalState, get, put, gets, modify)
+
+
 
 {-
 NOTE: This is not the actual "byte"code interpreter.
@@ -60,8 +64,8 @@ newtype Evaluate a =
   deriving (Functor, Applicative, Monad)
 
 instance MonadState Code Evaluate where
-  get   = Evaluate (StateT (\s -> return (s,s)))
-  put s = Evaluate (StateT (\_ -> return ((),s)))
+  get   = Evaluate $ StateT $ \s -> return (s,s)
+  put s = Evaluate $ StateT $ \_ -> return ((),s)
 
 -- Val is basically Weak Head Normal Form
 data Val = VInt  Int  -- constants s(0)
@@ -86,6 +90,22 @@ instance Show Val where
     "[" <> show v <> " : " <> show l  <> "]"
   show (VComb l) =
     "[" <> show l <> "]"
+
+
+
+$(myLangDefs
+ [d|
+   push :: Evaluate ()
+   push = do
+     e  <- getEnv
+     st <- getStack
+     mutateStack (e : st)
+
+   loadi :: Int -> Evaluate ()
+   loadi i = mutateEnv (VInt i)
+
+  |])
+
 
 -- Take a sequence of stack machine instructions
 -- and evaluate them to their normal form
@@ -250,22 +270,12 @@ restnth n = do
   fstEnv
   restnth (n - 1)
 
-push :: Evaluate ()
-push = do
-  e  <- getEnv
-  st <- getStack
-  mutateStack (e : st)
-
 swap :: Evaluate ()
 swap = do
   e      <- getEnv
   (h, t) <- popAndRest
   mutateEnv h
   mutateStack (e : t)
-
-loadi :: Int -> Evaluate ()
-loadi i = mutateEnv (VInt i)
-
 
 loadb :: Bool -> Evaluate ()
 loadb b = mutateEnv (VBool b)
@@ -443,3 +453,4 @@ dummyLabel = "dummy"
    Always PUSH before beginning computation
 2. BinOp (s(2)) expects first argument on stack and second on register
 -}
+
