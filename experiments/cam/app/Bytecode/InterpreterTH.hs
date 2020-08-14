@@ -92,7 +92,7 @@ instance Show Val where
     "[" <> show l <> "]"
 
 
-$(myLangDefs
+$(generateC
  [d|
    push :: Evaluate ()
    push = do

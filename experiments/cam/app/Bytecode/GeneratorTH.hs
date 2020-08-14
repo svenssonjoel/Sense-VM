@@ -57,7 +57,6 @@ newtype Lower a =
   deriving (Functor, Applicative, Monad, MonadState Scope)
 
 
-
 lower :: DExp -> Expr
 lower dexp = evalState (runLower (lowerExp dexp)) globals
   where
@@ -65,18 +64,22 @@ lower dexp = evalState (runLower (lowerExp dexp)) globals
 
 
 lowerExp :: DExp -> Lower Expr
-lowerExp (DVarE name) = undefined
-lowerExp (DLamE vars exp) = undefined
+lowerExp (Varname n _) = pure $! Var n -- qualified names and a lot of other cases not handled
 lowerExp (DAppE e1 e2) =
   if isSequence e1
   then do
     let (Bind e) = e1
     let var = getLamVar e2
-    e'  <- lowerExp e
+    e' <- if isVar e
+          then do
+           le <- lowerExp e
+           pure $! Call le []
+          else lowerExp e
     extendScope var
     e2' <- lowerExp e2
     pure $! Seq (Let var e') e2'
-  else undefined -- flatten the tree until you encounter a Sequence
+  else undefined
+lowerExp _ = error "Yet to handle other cases"
 
 isSequence :: DExp -> Bool
 isSequence (Bind e) = True
@@ -84,6 +87,8 @@ isSequence _ = False
 
 pattern Bind e =
   DAppE (DVarE (Name (OccName ">>=") (NameQ (ModName "GHC.Base")))) e
+
+pattern Varname n q = DVarE (Name (OccName n) q)
 
 -- XXX: An extremely partial function assuming this is only
 -- called from the application of a bind operation
@@ -112,6 +117,10 @@ data DExp = DVarE Name
           deriving (Eq, Show, Typeable, Data, Generic)
 -}
 
+isVar :: DExp -> Bool
+isVar (DVarE _) = True
+isVar _ = False
+
 isGlobal :: ScopedVar -> Bool
 isGlobal (GlobalVar _) = True
 isGlobal (LocalVar _)  = False
@@ -119,8 +128,8 @@ isGlobal (LocalVar _)  = False
 isLocal :: ScopedVar -> Bool
 isLocal = not . isGlobal
 
-myLangDefs :: Q [Dec] -> Q [Dec]
-myLangDefs x = do
+generateC :: Q [Dec] -> Q [Dec]
+generateC x = do
   x' <- x
   foo <- dsDecs x' :: Q [DDec]
   runIO $ do
