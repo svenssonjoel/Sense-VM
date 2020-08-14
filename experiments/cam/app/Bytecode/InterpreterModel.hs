@@ -200,7 +200,7 @@ jumpTo l = do
   pj <- gets prevJump
   let ix = st ~> l
   mutatePC ix
-  mutatePJ (pc : pj)
+  mutatePJ (pushPJ pc pj)
 
 -- return back to the previous "jumped from" label
 -- and increment the program counter by 1
@@ -254,14 +254,14 @@ push :: Evaluate ()
 push = do
   e  <- getEnv
   st <- getStack
-  mutateStack (e : st)
+  mutateStack (pushStack e st)
 
 swap :: Evaluate ()
 swap = do
   e      <- getEnv
   (h, t) <- popAndRest
   mutateEnv h
-  mutateStack (e : t)
+  mutateStack (pushStack e t)
 
 loadi :: Int -> Evaluate ()
 loadi i = mutateEnv (VInt i)
@@ -434,6 +434,10 @@ mutatePC c =
 mutatePJ :: [Index] -> Evaluate ()
 mutatePJ newIdxs =
   modify (\s -> s { prevJump = newIdxs })
+
+pushStack = (:)
+
+pushPJ = pushStack
 
 dummyLabel = "dummy"
 

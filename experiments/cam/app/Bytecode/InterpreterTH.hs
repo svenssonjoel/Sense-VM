@@ -24,7 +24,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Bytecode.InterpreterTH where
 
-import Bytecode.GeneratorTH
+import Bytecode.GeneratorTH hiding (Seq)
 import CAM
 import Data.List (find)
 import GHC.Arr
@@ -98,7 +98,7 @@ $(myLangDefs
    push = do
      e  <- getEnv
      st <- getStack
-     mutateStack (e : st)
+     mutateStack (pushStack e st)
 
    loadi :: Int -> Evaluate ()
    loadi i = mutateEnv (VInt i)
@@ -219,7 +219,7 @@ jumpTo l = do
   pj <- gets prevJump
   let ix = st ~> l
   mutatePC ix
-  mutatePJ (pc : pj)
+  mutatePJ (pushPJ pc pj)
 
 -- return back to the previous "jumped from" label
 -- and increment the program counter by 1
@@ -274,7 +274,7 @@ swap = do
   e      <- getEnv
   (h, t) <- popAndRest
   mutateEnv h
-  mutateStack (e : t)
+  mutateStack (pushStack e t)
 
 loadb :: Bool -> Evaluate ()
 loadb b = mutateEnv (VBool b)
@@ -443,6 +443,10 @@ mutatePC c =
 mutatePJ :: [Index] -> Evaluate ()
 mutatePJ newIdxs =
   modify (\s -> s { prevJump = newIdxs })
+
+pushStack = (:)
+
+pushPJ = pushStack
 
 dummyLabel = "dummy"
 
