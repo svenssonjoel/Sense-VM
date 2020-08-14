@@ -24,7 +24,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Bytecode.InterpreterTH where
 
-import Bytecode.HelperTH
+import Bytecode.GeneratorTH
 import CAM
 import Data.List (find)
 import GHC.Arr
@@ -90,7 +90,6 @@ instance Show Val where
     "[" <> show v <> " : " <> show l  <> "]"
   show (VComb l) =
     "[" <> show l <> "]"
-
 
 
 $(myLangDefs

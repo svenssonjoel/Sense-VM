@@ -21,7 +21,7 @@
 -- SOFTWARE.
 
 {-# LANGUAGE TemplateHaskell #-}
-module Bytecode.HelperTH where
+module Bytecode.GeneratorTH where
 
 import Language.Haskell.TH
 import Language.Haskell.TH.Desugar
