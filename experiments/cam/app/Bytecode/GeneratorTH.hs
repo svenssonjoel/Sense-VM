@@ -65,39 +65,43 @@ lower dexp = evalState (runLower (lowerExp dexp)) globals
 
 lowerExp :: DExp -> Lower Expr
 lowerExp (Varname n _) = pure $! Var n -- qualified names and a lot of other cases not handled
-lowerExp (DAppE e1 e2) =
+lowerExp app@(DAppE e1 e2) =
   if isSequence e1
   then do
-    let (Bind e) = e1
-    let var = getLamVar e2
+    let (Bind e _) = e1
+    let (var, body) = splitLambda e2
     e' <- if isVar e
           then do
-           le <- lowerExp e
-           pure $! Call le []
+           f <- lowerExp e
+           pure $! Call f []
           else lowerExp e
     extendScope var
-    e2' <- lowerExp e2
-    pure $! Seq (Let var e') e2'
-  else undefined
-lowerExp _ = error "Yet to handle other cases"
+    body' <- lowerExp body
+    pure $! Seq (Let var e') body'
+  else do
+    let (f, args) = unfoldApp app
+    f'    <- lowerExp f
+    args' <- traverse lowerExp args
+    pure $! Call f' args'
+lowerExp e = error $ "Yet to handle " <> show e
 
 isSequence :: DExp -> Bool
-isSequence (Bind e) = True
+isSequence (Bind _ _) = True
 isSequence _ = False
 
-pattern Bind e =
-  DAppE (DVarE (Name (OccName ">>=") (NameQ (ModName "GHC.Base")))) e
+pattern Bind e modname =
+  DAppE (DVarE (Name (OccName ">>=") modname)) e
 
 pattern Varname n q = DVarE (Name (OccName n) q)
 
 -- XXX: An extremely partial function assuming this is only
 -- called from the application of a bind operation
-getLamVar :: DExp -> String
-getLamVar (DLamE names _) = s
+splitLambda :: DExp -> (String, DExp)
+splitLambda (DLamE names e) = (s, e)
   where
     (n:_) = names
     (Name (OccName s) _) = n
-getLamVar _ = error "Sequencing an incorrect operation"
+splitLambda _ = error "Sequencing an incorrect operation"
 
 extendScope :: Var -> Lower ()
 extendScope v = modify $ \s -> LocalVar v : s
@@ -128,11 +132,20 @@ isGlobal (LocalVar _)  = False
 isLocal :: ScopedVar -> Bool
 isLocal = not . isGlobal
 
+unfoldApp :: DExp -> (DExp, [DExp])
+unfoldApp = go []
+  where
+    go args (DAppE fun arg) = go (arg:args) fun
+    go args fun = (fun, args)
+
 generateC :: Q [Dec] -> Q [Dec]
 generateC x = do
   x' <- x
   foo <- dsDecs x' :: Q [DDec]
+  let (DLetDec (DValD _ exp)) = foo !! 1
   runIO $ do
-    putStrLn "\nmyLangDefs (stub): would make definitions out of these:"
-    putStrLn $ show foo -- $ pprint x' ++ "\n"
+    putStrLn "\nGenerating C now :"
+    -- putStrLn $ show foo
+    putStrLn $ show $ lower exp -- $ pprint x' ++ "\n"
+    putStrLn "\n"
   return x'

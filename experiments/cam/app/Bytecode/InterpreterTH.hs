@@ -94,14 +94,12 @@ instance Show Val where
 
 $(generateC
  [d|
+
    push :: Evaluate ()
    push = do
      e  <- getEnv
      st <- getStack
      mutateStack (pushStack e st)
-
-   loadi :: Int -> Evaluate ()
-   loadi i = mutateEnv (VInt i)
 
   |])
 
@@ -275,6 +273,9 @@ swap = do
   (h, t) <- popAndRest
   mutateEnv h
   mutateStack (pushStack e t)
+
+loadi :: Int -> Evaluate ()
+loadi i = mutateEnv (VInt i)
 
 loadb :: Bool -> Evaluate ()
 loadb b = mutateEnv (VBool b)
