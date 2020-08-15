@@ -67,17 +67,27 @@ lowerExp :: DExp -> Lower Expr
 lowerExp (Varname n _) = pure $! Var n -- qualified names and a lot of other cases not handled
 lowerExp app@(DAppE e1 e2) =
   if isSequence e1
-  then do
-    let (Bind e _) = e1
-    let (var, body) = splitLambda e2
-    e' <- if isVar e
-          then do
-           f <- lowerExp e
-           pure $! Call f []
-          else lowerExp e
-    extendScope var
-    body' <- lowerExp body
-    pure $! Seq (Let var e') body'
+  then
+    case e1 of
+      (Bind e _) -> do
+        let (var, body) = splitLambda e2
+        e' <- if isVar e
+              then do
+               f <- lowerExp e
+               pure $! Call f []
+              else lowerExp e
+        extendScope var
+        body' <- lowerExp body
+        pure $! Seq (Let var e') body'
+      (BindSeq e _) -> do
+        e' <- if isVar e
+              then do
+               f <- lowerExp e
+               pure $! Call f []
+              else lowerExp e
+        e2' <- lowerExp e2
+        pure $! Seq e' e2'
+      _ -> error "Invalid sequence operation"
   else do
     let (f, args) = unfoldApp app
     f'    <- lowerExp f
@@ -87,10 +97,14 @@ lowerExp e = error $ "Yet to handle " <> show e
 
 isSequence :: DExp -> Bool
 isSequence (Bind _ _) = True
+isSequence (BindSeq _ _) = True
 isSequence _ = False
 
 pattern Bind e modname =
   DAppE (DVarE (Name (OccName ">>=") modname)) e
+
+pattern BindSeq e modname =
+  DAppE (DVarE (Name (OccName ">>") modname)) e
 
 pattern Varname n q = DVarE (Name (OccName n) q)
 
@@ -105,21 +119,6 @@ splitLambda _ = error "Sequencing an incorrect operation"
 
 extendScope :: Var -> Lower ()
 extendScope v = modify $ \s -> LocalVar v : s
-
-
-{-
-data DExp = DVarE Name
-          | DConE Name
-          | DLitE Lit
-          | DAppE DExp DExp
-          | DAppTypeE DExp DType
-          | DLamE [Name] DExp
-          | DCaseE DExp [DMatch]
-          | DLetE [DLetDec] DExp
-          | DSigE DExp DType
-          | DStaticE DExp
-          deriving (Eq, Show, Typeable, Data, Generic)
--}
 
 isVar :: DExp -> Bool
 isVar (DVarE _) = True
@@ -145,7 +144,7 @@ generateC x = do
   let (DLetDec (DValD _ exp)) = foo !! 1
   runIO $ do
     putStrLn "\nGenerating C now :"
-    -- putStrLn $ show foo
+    -- putStrLn $ show exp
     putStrLn $ show $ lower exp -- $ pprint x' ++ "\n"
     putStrLn "\n"
   return x'

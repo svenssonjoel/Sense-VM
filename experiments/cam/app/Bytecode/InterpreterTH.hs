@@ -103,6 +103,13 @@ $(generateC
 
   |])
 
+swap :: Evaluate ()
+swap = do
+  e      <- getEnv
+  (h, t) <- popAndRest
+  mutateEnv h
+  mutateStack (pushStack e t)
+
 
 -- Take a sequence of stack machine instructions
 -- and evaluate them to their normal form
@@ -266,13 +273,6 @@ restnth n = do
   e <- getEnv
   fstEnv
   restnth (n - 1)
-
-swap :: Evaluate ()
-swap = do
-  e      <- getEnv
-  (h, t) <- popAndRest
-  mutateEnv h
-  mutateStack (pushStack e t)
 
 loadi :: Int -> Evaluate ()
 loadi i = mutateEnv (VInt i)
