@@ -95,20 +95,20 @@ instance Show Val where
 $(generateC
  [d|
 
-   push :: Evaluate ()
-   push = do
-     e  <- getEnv
-     st <- getStack
-     mutateStack (pushStack e st)
+    push :: Evaluate ()
+    push = do
+      e  <- getEnv
+      st <- getStack
+      mutateStack (pushStack e st)
+
+    swap :: Evaluate ()
+    swap = do
+      e      <- getEnv
+      (h, t) <- popAndRest
+      mutateEnv h
+      mutateStack (pushStack e t)
 
   |])
-
-swap :: Evaluate ()
-swap = do
-  e      <- getEnv
-  (h, t) <- popAndRest
-  mutateEnv h
-  mutateStack (pushStack e t)
 
 
 -- Take a sequence of stack machine instructions
