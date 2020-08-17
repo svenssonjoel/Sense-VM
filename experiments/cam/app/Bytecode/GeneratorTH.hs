@@ -155,7 +155,7 @@ patternMatchCon :: DExp -> [DMatch] -> Lower Expr
 patternMatchCon e allMatches = do
   e' <- lowerExp e
   case (last allMatches) of
-    (DMatch DWildPa exp) -> do
+    (DMatch DWildPa exp) -> do -- check if there is a need for `else`
       tagExprs <- mapM (patternMatchBranch e) (init allMatches)
       let (Cond matches) = builder e' tagExprs
       exp' <- lowerExp exp
@@ -178,6 +178,10 @@ patternMatchBranch _ m =
   error $! "Pattern match on single constructor \
            \ called for wrong clause " <> show m
 
+-- The following function handles all the patterns inside a
+-- constructor. It traverses through the patterns and as it
+-- encounters new constructors, creates more `typeof` exprs
+-- and keeps traversing insider until it is done
 patternHandler :: Expr -> [(DPat, Int)] -> DExp -> Lower Expr
 patternHandler _ [] tailExpr = do
   tailExpr' <- lowerExp tailExpr
