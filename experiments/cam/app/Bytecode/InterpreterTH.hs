@@ -24,7 +24,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Bytecode.InterpreterTH where
 
-import Bytecode.GeneratorTH hiding (Seq)
+import Bytecode.GeneratorTH hiding (Seq, Tag)
 import CAM
 import Data.List (find)
 import GHC.Arr
@@ -92,6 +92,8 @@ instance Show Val where
     "[" <> show l <> "]"
 
 
+data Foo = A Int Foo | B | C Int Foo
+
 $(generateC
  [d|
 
@@ -107,6 +109,27 @@ $(generateC
       (h, t) <- popAndRest
       mutateEnv h
       mutateStack (pushStack e t)
+
+    fstEnv :: Evaluate ()
+    fstEnv = do
+      e <- getEnv
+      case e of
+        VPair v _ -> mutateEnv v
+        _ -> error "first operation on incorrect value type"
+
+    sndEnv :: Evaluate ()
+    sndEnv = do
+      e <- getEnv
+      case e of
+        VPair _ v -> mutateEnv v
+        _ -> error "second operation on incorrect value type"
+
+
+
+    foo :: Foo -> Int
+    foo r = case r of
+              (A n (C m B)) -> m + n
+
 
   |])
 
@@ -245,20 +268,6 @@ popAndRest = do
   st <- getStack
   let (h:t) = st
   return (h, t)
-
-fstEnv :: Evaluate ()
-fstEnv = do
-  e <- getEnv
-  case e of
-    VPair v _ -> mutateEnv v
-    _ -> error "first operation on incorrect value type"
-
-sndEnv :: Evaluate ()
-sndEnv = do
-  e <- getEnv
-  case e of
-    VPair _ v -> mutateEnv v
-    _ -> error "second operation on incorrect value type"
 
 accessnth :: Int -> Evaluate ()
 accessnth 0 = sndEnv
