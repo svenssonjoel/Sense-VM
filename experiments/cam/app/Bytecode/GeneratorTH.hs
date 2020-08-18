@@ -50,7 +50,10 @@ data Expr = Var Var
           | TypeOf Expr Tag -- used for pattern matching on constructors
                             -- in the generated C the relevant union type
                             -- should have a typeof function
-          deriving (Ord,Eq)
+          | CreateStruct Tag -- struct creation compiles to
+                             -- call `Tag` [e1, e2] looking at the
+                             -- tag we pick the correct function
+          deriving (Ord, Eq)
 
 instance Show Expr where
   show (Var v) = v
@@ -63,7 +66,7 @@ instance Show Expr where
   show (Seq e1 e2) = show e1 <> ";\n" <> show e2
   show (StructIndex e i) = show e <> " -> " <> show i
   show (TypeOf e t) = "typeof " <> show e <> " is " <> show t
-
+  show (CreateStruct t) = "mkStruct (ty " <> show t <> ") "
 
 
 -- conditional expressions expressed in a way which
@@ -147,7 +150,7 @@ lowerExp (DCaseE exp matches) =
       | length exprs == 0 = rest
       | length exprs == 1 = Seq (head exprs) rest
       | otherwise = Seq (head exprs) (buildExpr (tail exprs) rest)
-
+lowerExp (DConE (Name (OccName n) _)) = pure $! CreateStruct n
 lowerExp e = error $ "Yet to handle " <> show e
 
 
@@ -172,31 +175,29 @@ patternMatchCon e allMatches = do
 patternMatchBranch :: DExp -> DMatch -> Lower (Tag, Expr)
 patternMatchBranch e (DMatch (DConPa (Name (OccName s) _) pats) exp) = do
   e' <- lowerExp e
-  pExp <- patternHandler e' (zip pats [0..]) exp
+  pExp <- patternHandler (zip3 pats [0..] (repeat e')) exp
   pure $ (s, pExp)
 patternMatchBranch _ m =
   error $! "Pattern match on single constructor \
            \ called for wrong clause " <> show m
 
--- The following function handles all the patterns inside a
--- constructor. It traverses through the patterns and as it
--- encounters new constructors, creates more `typeof` exprs
--- and keeps traversing insider until it is done
-patternHandler :: Expr -> [(DPat, Int)] -> DExp -> Lower Expr
-patternHandler _ [] tailExpr = do
+-- See NOTE 1 to understand how this works
+patternHandler :: [(DPat, Int, Expr)] -> DExp -> Lower Expr
+patternHandler [] tailExpr = do
   tailExpr' <- lowerExp tailExpr
   pure tailExpr'
-patternHandler e ((p1,i):ps) tailExpr =
+patternHandler ((p1, i, e):ps) tailExpr =
   case p1 of
     DVarPa (Name (OccName n) _) -> do
-      rest <- patternHandler e ps tailExpr
+      rest <- patternHandler ps tailExpr
       pure $! Seq (Let n (StructIndex e i)) rest
     DConPa (Name (OccName t) _) pats -> do
       n <- newVarName
-      rest <- patternHandler (Var n) ((zip pats [0..]) ++ ps) tailExpr
+      let vars = repeat (Var n)
+      rest <- patternHandler (ps ++ zip3 pats [0..] vars) tailExpr
       pure $! (Let n (StructIndex e i)) `Seq`
               (Cond $ IfThen (TypeOf (Var n) t) rest)
-    DWildPa -> patternHandler e ps tailExpr
+    DWildPa -> patternHandler ps tailExpr
     DLitPa _ -> error "Literal patterns not supported"
     p -> error $! "Does not handle pattern " <> show p
 
@@ -351,7 +352,7 @@ generateC :: Q [Dec] -> Q [Dec]
 generateC x = do
   x' <- x
   foo <- dsDecs x' :: Q [DDec]
-  let (DLetDec (DValD _ exp)) = foo !! 7
+  let (DLetDec (DValD _ exp)) = foo !! 13
   let (DLetDec (DFunD _ clauses)) = foo !! 9
   let (DClause _ exp') = clauses !! 0
   runIO $ do
@@ -360,3 +361,29 @@ generateC x = do
     putStrLn $ show $ lower exp -- $ pprint x' ++ "\n"
     putStrLn "\n"
   return x'
+
+-- NOTE 1
+{-
+
+The following function handles all the patterns inside a
+constructor. It traverses through the patterns and as it
+encounters new constructors, creates more `typeof` exprs
+and keeps traversing insider until it is done
+
+Eg: case val of
+        (A m (B x y) z) = ...
+Above, first bind m and then z so
+let m = val [0];
+let z = val [2];
+
+Then create a variable name like `temp1`
+
+let temp1 = val[1]
+
+Now when you go inside the B constructor create an `if`
+if typeof temp1 is "B"{
+-- keep recursing but this time
+-- use the varname `temp1`
+}
+
+-}

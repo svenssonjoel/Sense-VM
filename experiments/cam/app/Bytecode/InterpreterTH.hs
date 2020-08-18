@@ -67,6 +67,7 @@ instance MonadState Code Evaluate where
   get   = Evaluate $ StateT $ \s -> return (s,s)
   put s = Evaluate $ StateT $ \_ -> return ((),s)
 
+
 -- Val is basically Weak Head Normal Form
 data Val = VInt  Int  -- constants s(0)
          | VBool Bool -- constants s(0)
@@ -94,6 +95,7 @@ instance Show Val where
 
 data Foo = A Int Foo | B | C Int Foo
 
+data Bar = X Bar Int | Y
 $(generateC
  [d|
 
@@ -129,6 +131,18 @@ $(generateC
     foo :: Foo -> Int
     foo r = case r of
               (A n (C m B)) -> m + n
+
+    bar :: Bar -> Int
+    bar r = case r of
+              (X (X _ n) m) -> m + n
+
+    cons :: Evaluate ()
+    cons = do
+      e      <- getEnv
+      (h, t) <- popAndRest
+      mutateEnv (VPair h e)
+      mutateStack t
+
 
 
   |])
@@ -374,13 +388,6 @@ binaryop bop = do
           mutateEnv (VBool (t1 == t2 && v1 == v2))
           mutateStack t
         _ -> error "Equality not supported for other whnf types"
-
-cons :: Evaluate ()
-cons = do
-  e      <- getEnv
-  (h, t) <- popAndRest
-  mutateEnv (VPair h e)
-  mutateStack t
 
 cur :: Label -> Evaluate ()
 cur l = do
