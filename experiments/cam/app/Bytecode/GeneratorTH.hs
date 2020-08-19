@@ -365,7 +365,7 @@ generateC x = do
 -- NOTE 1
 {-
 
-The following function handles all the patterns inside a
+The function patternHandler handles all the patterns inside a
 constructor. It traverses through the patterns and as it
 encounters new constructors, creates more `typeof` exprs
 and keeps traversing insider until it is done
@@ -384,6 +384,8 @@ Now when you go inside the B constructor create an `if`
 if typeof temp1 is "B"{
 -- keep recursing but this time
 -- use the varname `temp1`
+  let x = temp1 [0]
+  let y = temp1 [1]
 }
 
 -}
