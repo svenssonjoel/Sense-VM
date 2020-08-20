@@ -22,9 +22,22 @@
 /* SOFTWARE.									  */
 /**********************************************************************************/
 
-#ifndef __CAM_H_
-#define __CAM_H_
+#include <heap.h>
 
-#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-#endif
+
+int main(int argc, char **argv) {
+
+  int r = heap_init(1000);
+
+  if (r) {
+    printf("heap_init: OK!\n");
+  } else {
+    printf("heap_init: Failed!\n");
+  }
+
+  heap_destroy();
+  return r;
+}

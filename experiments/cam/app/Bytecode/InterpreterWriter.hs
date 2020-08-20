@@ -439,7 +439,7 @@ mutatePJ :: [Index] -> Evaluate ()
 mutatePJ newIdxs =
   modify (\s -> s { prevJump = newIdxs })
 
-dummyLabel = "dummy"
+dummyLabel = Label (-1)
 
 -- NOTE:
 {-

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: be529676b9f21607d9d44829802a8b0f32042511b655d847a290f05827b54dc1
+-- hash: e503f5d6437e0a67b2e0a12037d5ebc22b85002333d2d6569af3afc95cb14ca1
 
 name:           cam
 version:        0.1.0.0
@@ -51,6 +51,7 @@ library
     , language-c99
     , language-c99-simple
     , mtl
+    , primitive
     , template-haskell
     , th-desugar
   default-language: Haskell2010
@@ -81,6 +82,7 @@ executable cam-exe
     , language-c99
     , language-c99-simple
     , mtl
+    , primitive
     , template-haskell
     , th-desugar
   default-language: Haskell2010

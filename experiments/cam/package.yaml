@@ -32,6 +32,7 @@ library:
     - language-c99
     - language-c99-simple
     - mtl
+    - primitive
     - template-haskell
     - th-desugar
     default-extensions:
@@ -53,6 +54,7 @@ executables:
     - language-c99-simple
     - haskell-src
     - mtl
+    - primitive
     - template-haskell
     - th-desugar
     default-extensions:

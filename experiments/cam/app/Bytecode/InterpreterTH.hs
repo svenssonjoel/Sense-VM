@@ -465,7 +465,7 @@ pushStack = (:)
 
 pushPJ = pushStack
 
-dummyLabel = "dummy"
+dummyLabel = Label (-1)
 
 -- NOTE:
 {-

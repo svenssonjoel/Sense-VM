@@ -22,9 +22,17 @@
 /* SOFTWARE.									  */
 /**********************************************************************************/
 
-#ifndef __CAM_H_
-#define __CAM_H_
+#ifndef __PLATFORM_H_
+#define __PLATFORM_H_
 
-#include <stdint.h>
+
+
+
+
+/********************/
+/* VM Configuration */
+/********************/
+
+#define N_MAX_HEAP_CELLS 6000
 
 #endif
