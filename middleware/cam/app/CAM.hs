@@ -43,6 +43,15 @@ type Var = String
 type Tag = String
 type TaggedField = (Tag, Pat)
 
+data Type = TUInt
+          | TInt
+          | TFloat
+          | TBool
+          | TNil
+          | TArr   Type Type
+          | TTuple Type Type
+          deriving(Ord, Show, Eq)
+
 data Exp = Var Var  -- variable
          | Sys Sys  -- Primops
          | Void     -- Empty Tuple
