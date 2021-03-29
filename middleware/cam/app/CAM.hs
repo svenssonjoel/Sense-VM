@@ -48,28 +48,28 @@ data Type = TUInt
           | TFloat
           | TBool
           | TNil
-          | TArr   Type Type
+          | TArrow Type Type
           | TTuple Type Type
           deriving(Ord, Show, Eq)
 
-data Exp = Var Var  -- variable
-         | Sys Sys  -- Primops
-         | Void     -- Empty Tuple
-         | Pair Exp Exp    -- Pair
-         | Con  Tag Exp    -- Constructed Value
-         | App Exp Exp     -- Function application
-         | Lam Pat Exp     -- Lambda Abstraction
-         | If Exp Exp Exp  -- if then else
-         | Let Pat Exp Exp -- Let bindings
-         | Letrec [(Pat,Exp)] Exp -- letrec
-         | Case Exp [(TaggedField, Exp)]
+data Exp = Var  Type Var  -- variable
+         | Sys  Type Sys  -- Primops
+         | Void Type    -- Empty Tuple
+         | Pair Type Exp Exp    -- Pair
+         | Con  Type Tag Exp    -- Constructed Value
+         | App Type Exp Exp     -- Function application
+         | Lam Type Pat Exp     -- Lambda Abstraction
+         | If  Type Exp Exp Exp  -- if then else
+         | Let Type Pat Exp Exp  -- Let bindings
+         | Letrec Type [(Pat,Exp)] Exp -- letrec
+         | Case   Type Exp [(TaggedField, Exp)]
          deriving (Ord, Show, Eq)
 
-data Sys = Sys2 BinOp Exp Exp -- BinOp
-         | Sys1 UnaryOp Exp     -- UnaryOp
-         | LInt Int32   -- Int s(0) in cam
-         | LFloat Float -- Float s(0) in cam
-         | LBool Bool   -- Bool s(0) in cam
+data Sys = Sys2 BinOp   Type Exp Exp -- BinOp
+         | Sys1 UnaryOp Type Exp     -- UnaryOp
+         | LInt Int32    -- Int s(0) in cam
+         | LFloat Float  -- Float s(0) in cam
+         | LBool  Bool   -- Bool s(0) in cam
          deriving (Ord, Show, Eq)
 
 
@@ -99,10 +99,10 @@ instance Show UnaryOp where
   show NOT = "~"
   show DEC = "dec"
 
-data Pat = PatVar Var
-         | Empty
-         | PatPair Pat Pat
-         | As Var Pat      -- var `as` pat; equivalent to @ in Haskell
+data Pat = PatVar  Type Var
+         | Empty   Type
+         | PatPair Type Pat Pat
+         | As Var  Type Pat      -- var `as` pat; equivalent to @ in Haskell
          deriving (Ord, Show, Eq)
 
 data Instruction
@@ -201,33 +201,33 @@ interpret e = instrs <+> Ins STOP <+> fold thunks_
         initState
 
 codegen :: Exp -> Env -> Codegen CAM
-codegen (Var var) env = pure $! lookup var env 0
-codegen (Sys (LInt n)) _  = pure $! Ins $ QUOTE (LInt n)  -- s(0)
-codegen (Sys (LFloat f)) _  = pure $! Ins $ QUOTE (LFloat f)  -- s(0)
-codegen (Sys (LBool b)) _ = pure $! Ins $ QUOTE (LBool b) -- s(0)
-codegen (Sys (Sys1 uop e)) env = do
+codegen (Var _ var) env = pure $! lookup var env 0
+codegen (Sys _ (LInt n)) _  = pure $! Ins $ QUOTE (LInt n)  -- s(0)
+codegen (Sys _ (LFloat f)) _  = pure $! Ins $ QUOTE (LFloat f)  -- s(0)
+codegen (Sys _ (LBool b)) _ = pure $! Ins $ QUOTE (LBool b) -- s(0)
+codegen (Sys _ (Sys1 uop _ e)) env = do
   i1 <- codegen e env
   pure $! i1 <+> (Ins (PRIM1 uop))
-codegen (Sys (Sys2 bop e1 e2)) env = do
+codegen (Sys _ (Sys2 bop _ e1 e2)) env = do
   is <- codegen2 e1 e2 env
   pure $! is <+> (Ins (PRIM2 bop))
-codegen Void _ = pure $! Ins CLEAR
-codegen (Pair e1 e2) env = do
+codegen (Void _) _ = pure $! Ins CLEAR
+codegen (Pair _ e1 e2) env = do
   is <- codegen2 e1 e2 env
   pure $! is <+> (Ins CONS)
-codegen (Con tag e) env = do
+codegen (Con _ tag e) env = do
   i1 <- codegen e env
   pure $! i1 <+> (Ins $ PACK tag)
-codegen (App e1 e2) env = do
+codegen (App _ e1 e2) env = do
   is <- codegen2 e2 e1 env
   pure $! is <+> (Ins APP)
-codegen (Lam pat e) env = do
+codegen (Lam _ pat e) env = do
   l <- freshLabel
   is <- codegenR e (EnvPair env pat)
   ts <- S.gets thunks
   S.modify $ \s -> s {thunks = (Lab l is) : ts}
   pure (Ins $ CUR l)
-codegen (If e1 e2 e3) env = do
+codegen (If _ e1 e2 e3) env = do
   l1 <- freshLabel
   l2 <- freshLabel
   is1 <- codegen e1 env
@@ -240,7 +240,7 @@ codegen (If e1 e2 e3) env = do
       <+> Ins (GOTO l2)
       <+> Lab l1 is3
       <+> Lab l2 (Ins SKIP)
-codegen (Case cond clauses) env = do
+codegen (Case _ cond clauses) env = do
   labels    <- replicateM (length clauses) freshLabel
   skiplabel <- freshLabel
   cond'     <- codegen cond env
@@ -259,14 +259,14 @@ codegen (Case cond clauses) env = do
           <+> Ins (GOTO skipl)
     exps = map snd clauses
     pats = map (snd . fst) clauses
-codegen (Let pat e1 e) env = do
+codegen (Let _ pat e1 e) env = do
   i1 <- codegen e1 env
   i  <- codegen e  (EnvPair env pat)
   pure $! Ins PUSH
       <+> i1
       <+> Ins CONS
       <+> i
-codegen (Letrec recpats e) env = do
+codegen (Letrec _ recpats e) env = do
   labels  <- replicateM (length recpats) freshLabel
   let evalEnv = growEnv env (zip pats labels)
   instr  <- codegen e evalEnv
@@ -308,14 +308,14 @@ lookup var (EnvAnn env (pat, l)) n =
   (lookup var env n)
 
 lookupPat :: Var -> Pat -> CAM
-lookupPat _ Empty = Ins FAIL
-lookupPat x (PatVar v)
+lookupPat _ (Empty _) = Ins FAIL
+lookupPat x (PatVar _ v)
   | x == v = Ins SKIP
   | otherwise = Ins FAIL
-lookupPat x (PatPair p1 p2) =
+lookupPat x (PatPair _ p1 p2) =
   ((Ins FST) <+> (lookupPat x p1)) <?>
   ((Ins SND) <+> (lookupPat x p2))
-lookupPat x (As y p)
+lookupPat x (As y _ p)
   | x == y = Ins SKIP
   | otherwise = lookupPat x p
 
