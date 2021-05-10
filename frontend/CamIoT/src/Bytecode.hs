@@ -438,7 +438,7 @@ Unhandled patterns:
 
 
 -- Experiments --
-path = "testcases/good9.cam"
+path = "testcases/good11.cam"
 
 test :: IO ()
 test = do
@@ -461,7 +461,7 @@ test = do
 
       putStrLn $ "\n\n CAM HS Interpreter \n\n"
       let val = IM.evaluate $ C.interpret camir
-      putStrLn $ show val
+      -- putStrLn $ show val
 
       putStrLn $ "\n\n CAM Assembler and true bytecode generator \n\n"
       -- A.genbytecode cam

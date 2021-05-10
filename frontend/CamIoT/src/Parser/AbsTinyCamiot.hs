@@ -39,6 +39,9 @@ data Type
     | TBool
     | TInt
     | TFloat
+    -- I/O types
+    | TChannel Type
+    | TEvent   Type
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Exp a
@@ -58,6 +61,10 @@ data Exp a
     | EVar a Ident
     | EUVar a UIdent
     | EConst a Const
+    -- Runtime functions:
+    -- spawn#, send#, sync#, recv#, spawnDriver#, channel#, choose#
+    | ERTS2 a (RTS2 a) (Exp a) (Exp a)
+    | ERTS1 a (RTS1 a) (Exp a)
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 instance C.Functor Exp where
@@ -78,9 +85,38 @@ instance C.Functor Exp where
         EVar a ident -> EVar (f a) ident
         EUVar a uident -> EUVar (f a) uident
         EConst a const -> EConst (f a) const
+        ERTS2  a rts2op exp1 exp2 ->
+          ERTS2 (f a) (fmap f rts2op) (fmap f exp1) (fmap f exp2)
+        ERTS1  a rts1op exp ->
+          ERTS1 (f a) (fmap f rts1op) (fmap f exp)
+
+
+data RTS2 a = Send a | Spawndriver a
+          deriving (C.Eq, C.Ord, C.Show, C.Read)
+
+instance C.Functor RTS2 where
+    fmap f x = case x of
+        Send a -> Send (f a)
+        Spawndriver a -> Spawndriver (f a)
+
+
+data RTS1 a = Channel a | Recv a
+            | Spawn a   | Choose a
+            | Sync  a
+          deriving (C.Eq, C.Ord, C.Show, C.Read)
+
+instance C.Functor RTS1 where
+    fmap f x = case x of
+        Channel a -> Channel (f a)
+        Recv   a  -> Recv (f a)
+        Spawn  a  -> Spawn (f a)
+        Choose a  -> Choose (f a)
+        Sync   a  -> Sync (f a)
+
 
 data AddOp a = Plus a | Minus a
   deriving (C.Eq, C.Ord, C.Show, C.Read)
+
 
 instance C.Functor AddOp where
     fmap f x = case x of

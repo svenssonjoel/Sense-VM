@@ -69,8 +69,16 @@ pClosed = choice [ TInt    <$ pSymbol "Int"
                           _   -> pure (TTup ts)
                  ]
 
+tchannel :: Text
+tchannel = "Channel"
+
+tevent :: Text
+tevent = "Event"
+
 pApp :: Parser Type
-pApp = choice [ TAdt <$> pUIdent <*> many pClosed
+pApp = choice [ TChannel <$ pSymbol tchannel <*> pClosed
+              , TEvent   <$ pSymbol tevent   <*> pClosed
+              , TAdt <$> pUIdent <*> many pClosed
               , pClosed
               ]
 
@@ -94,10 +102,11 @@ pExpClosed = choice [ EConst () <$> pConst
                              _   -> pure (ETup () es)]
 
 pExpApp :: Parser (Exp ())
-pExpApp = foldl1 (EApp ()) <$> some pExpClosed
+pExpApp = choice [ pExpRTS1
+                 , foldl1 (EApp ()) <$> some pExpClosed]
 
 pExpNot :: Parser (Exp ())
-pExpNot = ENot () <$> (pChar '!' *> pExpApp) 
+pExpNot = ENot () <$> (pChar '!' *> pExpApp)
       <|> pExpApp
 
 pExpMul :: Parser (Exp ())
@@ -131,6 +140,17 @@ pExpAnd = foldr1 (EAnd ()) <$> sepBy1 pExpRel (pSymbol "&&")
 
 pExpOr :: Parser (Exp ())
 pExpOr = foldr1 (EOr ()) <$> sepBy1 pExpAnd (pSymbol "||")
+
+pExpRTS1 :: Parser (Exp ())
+pExpRTS1 =
+  (pSymbol "channel" >>
+   pSymbol "()" >>
+   (pure $ ERTS1 () (Channel ()) (EConst () CNil)))
+
+pExpRTS2 :: Parser (Exp ())
+pExpRTS2 =
+      (pSymbol "send#" >> pExpApp)
+  <|> (pSymbol "spawnDriver#" >> pExpApp)
 
 pExpVerbose :: Parser (Exp ())
 pExpVerbose = choice [
