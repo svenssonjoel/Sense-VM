@@ -218,7 +218,16 @@ int cam_step(void) {
   evaluators[inst]();
   return ms.pc; 
 }
-
+/* Error handling for cam_step: thought.      */
+/* Add some inflooping code to each program   */
+/*                                            */
+/* label_fatal: skip                          */
+/*              goto label_fatal              */
+/*                                            */
+/* and in case of some unrecoverable error    */
+/* set pc to label_fatal.                     */
+/* could have different labels for different  */
+/* kinds of errors. out of memory for example */
 
 
 
