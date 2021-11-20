@@ -196,11 +196,31 @@ typedef struct {
 /* One of these per VMC later */
 machine_state_t ms;
 
+
+/*********************************/
+/* MACHINE CONTROL FUNCTIONALITY */
+
+
 void cam_setup_machine_state(vmc_t *vmc) {
   ms.heap = &vmc->heap;
   ms.code = vmc->code_memory;
   ms.code_size=vmc->code_size;
 }
+
+
+/* execute a byte code operation */
+/* TODO: Try to see if we can run some predetermined number of steps */
+/* for each call to cam_step. This should improve efficiency a lot!  */
+/* One idea could be to execute 10 instructions or until there is  a */
+/* blocking instruction. Whichever comes first                       */
+int cam_step(void) {
+  uint8_t inst = ms.code[ms.pc];
+  evaluators[inst]();
+  return ms.pc; 
+}
+
+
+
 
 /********************************/
 /* Stack manipulation functions */
@@ -1171,7 +1191,7 @@ void eval_switchi(void){
 }
 
 /**************************************************************/
-/*  TODO ALL THE HANDLERS */
+/*       RTS HANDLERS                                         */
 
 
 static int handle_spawn(void){

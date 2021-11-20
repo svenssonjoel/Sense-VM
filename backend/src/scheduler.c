@@ -140,39 +140,11 @@ int scheduler(vmc_t *container,
   uint32_t total_msgs = 0;
 #endif
 
-
   // set logical time
   initLogicalTime(container);
 
 
   while (true) {
-
-#ifdef TRACE_ON
-    uint32_t num_msgs = msgq_num_used(container);
-
-    uint8_t bytes[4];
-    bytes[0] = container->code_memory[container->contexts[container->current_running_context_id].pc+1];
-    bytes[1] = container->code_memory[container->contexts[container->current_running_context_id].pc+2];
-    bytes[2] = container->code_memory[container->contexts[container->current_running_context_id].pc+3];
-    bytes[3] = container->code_memory[container->contexts[container->current_running_context_id].pc+4];
-
-    trace_add(container->current_running_context_id,
-	      container->contexts[container->current_running_context_id].env,
-	      container->contexts[container->current_running_context_id].pc,
-	      container->code_memory[container->contexts[container->current_running_context_id].pc],
-	      stack_get_sp(&container->contexts[container->current_running_context_id].stack),
-	      num_msgs,
-	      total_msgs,
-	      bytes, heap_get_stats());
-#endif
-    /* if (container->current_running_context_id != UUID_NONE) { */
-
-    /*   dbg_print("[%d] stack sp: %u\r\n", */
-    /* 		container->current_running_context_id, */
-    /* 		stack_get_sp(&container->contexts[container->current_running_context_id].stack)); */
-    /* } */
-
-    //dbg_print("CURRENT_ID: %u\r\n", container->current_running_context_id);
 
     if(container->all_contexts_stopped){
       // All of the contexts have encountered the STOP operation; Program STOP
@@ -184,123 +156,22 @@ int scheduler(vmc_t *container,
        - threads cooperative.
        -
     */
-
-    //bool activation = false; 
-    
     /* If we are doing nothing, block on the message queue */
     if (container->current_running_context_id == UUID_NONE) {
 
- /*      dbg_print("***********************\r\n"); */
-/*       dbg_print("Blocking: showing trace\r\n"); */
-/* #ifdef TRACE_ON */
-/*       trace_print(dbg_print, 25); */
-/* #endif	 */
-      //   dbg_print("Blocking in wait for message \r\n");
       block_msg(container, &msg);
-#ifdef TRACE_ON
-      total_msgs ++;
-#endif
 
-      //activation = true;
-      
-      /* dbg_print("Message received: blocking\r\n"); */
-      /* dbg_print("  Sender: %u\r\n", msg.sender_id); */
-      /* dbg_print("  msg_typ: %u\r\n", msg.msg_type); */
-      /* dbg_print("  data: %u\r\n", msg.data); */
-      //      dbg_print("  time: %llu\r\n", msg.timestamp);
       /*handle msg */
       int msg_r = handle_msg(container, &msg);
       if (msg_r  <= 0) {
 	dbg_print("Error in handle_msg: %d\r\n",msg_r);
-
-#ifdef TRACE_ON
-	trace_print(dbg_print, 1000);
-#endif
-
 	return -1;
 	/* continue as if nothing has happend.
 	   This should be like throwing the message away */
       }
-
-      /* else { */
-      /* 	uint32_t baseline_low; */
-      /* 	uint32_t baseline_high; */
-      /* 	uint32_t t_low; */
-      /* 	uint32_t t_high; */
-      /* 	Time t = sys_time_get_current_ticks(); */
-      /* 	t_low = t; */
-      /* 	t_high = t >> 32; */
-      /* 	baseline_low = container->contexts[container->current_running_context_id].logicalTime; */
-      /* 	baseline_high = container->contexts[container->current_running_context_id].logicalTime >> 32; */
-
-      /* 	dbg_print("Current ctx: %d   (Baseline: %u, %u) (t: %u, %u)\r\n", */
-      /* 		  container->current_running_context_id, */
-      /* 		  baseline_high,baseline_low, t_high, t_low); */
-      /* } */
-      
-      /* while (poll_msg(container, &msg) == 0) { */
-      /* 	dbg_print("message received: poll loop in blocking\r\n"); */
-      /* 	dbg_print("  driver: %u\r\n", msg.driver_id); */
-      /* 	dbg_print("  msg_typ: %u\r\n", msg.msg_type); */
-      /* 	dbg_print("  data: %u\r\n", msg.data); */
-      /* 	dbg_print("  time: %llu\r\n", msg.timestamp); */
-      /* 	/\* handle msg *\/ */
-      /* 	handle_msg(container, &msg); */
-      /* 	/\* This should be the same handler as below, do not context-switch*\/ */
-      /* 	//handle_msg(container, &msg); */
-      /*   /\*handle messages*\/ */
-      /*   /\* enqueue processes *\/ */
-      /* } */
-    }
-
-    /* If a context is running do this... */
-    if (container->current_running_context_id != UUID_NONE) {
-
-      INT *pc = (INT *)&container->contexts[container->current_running_context_id].pc;
-      //dbg_print("%x\r\n", (uint32_t)pc);
-      
-      /* dbg_print("*****************************************************\r\n"); */
-      /* dbg_print("executing ctx: %d\r\n", container->current_running_context_id); */
-      /* dbg_print("ctx pc: %d\r\n", container->contexts[container->current_running_context_id].pc); */
-      /* dbg_print("pc    : %d\r\n", *pc); */
-      /* dbg_print("sp    : %d\r\n", stack_get_sp(&container->contexts[container->current_running_context_id].stack)); */
-      /* dbg_print("current env: %u\r\n", container->contexts[container->current_running_context_id].env.value); */
-      /* dbg_print("current instr: 0x%x  [Dec: %u]\r\n", container->code_memory[*pc], container->code_memory[*pc]); */
-      /* dbg_print("sizeof(evaluators) = %d\r\n", sizeof(evaluators)); */
-
-      /* Execute an instruction */
-
-      uint8_t current_inst = container->code_memory[*pc];
-      /* if (current_inst == 55){ */
-      /*   uint8_t next_inst = container->code_memory[*pc+1]; */
-      /*   DEBUG_PRINT(("%u %u\n", current_inst, next_inst)); */
-      /* } else { */
-      /*   DEBUG_PRINT(("%u\n", current_inst)); */
-      /* } */
-
-      if (current_inst > (sizeof(evaluators) / 4)) {
-	
-        dbg_print("current_inst = %u at pc = %d is invalid   (ctx = %u) \r\n", current_inst, *pc, container->current_running_context_id);
-	/* dbg_print("*****************************************************\r\n"); */
-	/* dbg_print("executing ctx: %d\r\n", container->current_running_context_id); */
-	/* dbg_print("ctx pc: %d\r\n", container->contexts[container->current_running_context_id].pc); */
-	/* dbg_print("pc    : %d\r\n", *pc); */
-	/* dbg_print("current env: %u\r\n", container->contexts[container->current_running_context_id].env.value); */
-	/* dbg_print("current instr: 0x%x\r\n", container->code_memory[*pc]); */
-	/* dbg_print("sizeof(evaluators) = %d\r\n", sizeof(evaluators)); */
-#ifdef TRACE_ON
-	trace_print(dbg_print, 25);
-#endif
-	return -1;
-      } else {
-        evaluators[current_inst]();
-      }
-
-      if(*pc  == -1){
-        dbg_print("Instruction %u failed",current_inst);
-#ifdef TRACE_ON
-	trace_print(dbg_print, 25);
-#endif
+    } else {
+      if(cam_step() == -1){
+        dbg_print("Instruction failed");
         return -1; // error
       }
     }

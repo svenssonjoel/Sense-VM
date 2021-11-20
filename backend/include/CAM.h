@@ -35,4 +35,7 @@ typedef void (*eval_fun) (void);
 /* TODO: The list of evaluators should be specified as constant */
 extern eval_fun evaluators[56]; // 56 instructions
 
+extern void cam_setup_machine(vmc_t *vmc);
+extern int  cam_step(void);
+
 #endif
