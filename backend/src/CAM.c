@@ -187,7 +187,7 @@ typedef struct {
                           // TODO: Set each time scheduler
                           // runs "step" 
   
-  /* constant for each VMC */
+  /* Constant for each VMC */
   const uint8_t *code;
   UINT code_size;
 
