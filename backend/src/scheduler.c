@@ -293,7 +293,7 @@ int scheduler(vmc_t *container,
 #endif
 	return -1;
       } else {
-        evaluators[current_inst](container, pc);
+        evaluators[current_inst]();
       }
 
       if(*pc  == -1){

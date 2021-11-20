@@ -1174,7 +1174,7 @@ void eval_switchi(void){
 /*  TODO ALL THE HANDLERS */
 
 
-static int handle_spawn(vmc_t *vmc){
+static int handle_spawn(void){
 
   /* IMP:
    * spawn starts a new process with the signature () -> ()
@@ -1184,25 +1184,24 @@ static int handle_spawn(vmc_t *vmc){
    * on the cases of a closure [v:l] (snocced in this case) or
    * a combinator [l] (simply place () in the env in this case)
    */
+  int r = 0;
   cam_value_t empty_tuple = { .value = 0, .flags = 0 };
 
-
-
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+  cam_register_t e = ms.env;
 
   heap_index closure_address = e.value;
 
 
-  cam_value_t heap_f = heap_fst(&vmc->heap, closure_address);
-  cam_value_t heap_s = heap_snd(&vmc->heap, closure_address);
+  cam_value_t heap_f = heap_fst(ms.heap, closure_address);
+  cam_value_t heap_s = heap_snd(ms.heap, closure_address);
 
   if(heap_s.value == COMB){ // if combinator
 
     cam_value_t label = heap_f;
 
-    vmc->contexts[vmc->current_running_context_id].env = empty_tuple;
+    ms.env = empty_tuple;
 
-    return spawn(vmc, (uint16_t)label.value); // will place PID in env
+    r =  spawn(ms.vmc, (uint16_t)label.value); // will place PID in env
 
 
   } else { // not a combinator but a closure
@@ -1210,47 +1209,46 @@ static int handle_spawn(vmc_t *vmc){
     cam_value_t val = heap_f;
     cam_value_t label = heap_s;
 
-
     // Put (v, ()) of [v:l] on the env register; Read above why () comes;
     // spawn then copies the content of the env register to
     // the `env` register of the new context
 
-    heap_index hi = vmc_heap_alloc_withGC(vmc);
+    heap_index hi = vmc_heap_alloc_withGC(ms.vmc);
     if(hi == HEAP_NULL){
       DEBUG_PRINT(("Heap allocation has failed"));
-      return -1;
+      r = -1;
+    } else {
+      heap_set(ms.heap, hi, val, empty_tuple);
+      cam_value_t new_env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
+
+      ms.env = new_env_pointer;
+
+      // Spawn will places the label graveyard address on the stack
+      r = spawn(ms.vmc, (uint16_t)label.value); // will place PID in env
     }
-    heap_set(ms.heap, hi, val, empty_tuple);
-    cam_value_t new_env_pointer =
-      { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-
-    vmc->contexts[vmc->current_running_context_id].env = new_env_pointer;
-
-    // Spawn will places the label graveyard address on the stack
-    return spawn(vmc, (uint16_t)label.value); // will place PID in env
-
   }
-
+  return r;
 }
 
-static int handle_channel(vmc_t *vmc){
+static int handle_channel(void){
   UUID chan_id;
-  int j = channel(vmc, &chan_id);
+  int r = -1;
+  int j = channel(ms.vmc, &chan_id);
   if(j == -1){
     DEBUG_PRINT(("Error initializing a channel \n"));
-    return j;
+  } else {
+    cam_value_t channel_cam = { .value = (UINT)chan_id, .flags = 0 };
+    ms.env = channel_cam;
+    r = 1;
   }
-  cam_value_t channel_cam = { .value = (UINT)chan_id, .flags = 0 };
-  vmc->contexts[vmc->current_running_context_id].env = channel_cam;
-  return 1;
+  return r;
 }
 
-static int handle_sendevt(vmc_t *vmc){
-  cam_value_t message = vmc->contexts[vmc->current_running_context_id].env;
+static int handle_sendevt(void){
+  cam_value_t message = ms.env;
 
   cam_register_t hold_reg;
-  int i =
-    stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
     return -1;
@@ -1258,7 +1256,7 @@ static int handle_sendevt(vmc_t *vmc){
   UUID channel_id = (UUID)hold_reg.value;
 
   event_t send_evt;
-  int j = sendEvt(vmc, &channel_id, message, &send_evt);
+  int j = sendEvt(ms.vmc, &channel_id, message, &send_evt);
   if(j == -1){
     DEBUG_PRINT(("Error with sendEvt \n"));
     return j;
@@ -1266,17 +1264,17 @@ static int handle_sendevt(vmc_t *vmc){
 
   cam_value_t send_evt_env =
     { .value = (UINT)send_evt, .flags = VALUE_PTR_BIT };
-  vmc->contexts[vmc->current_running_context_id].env = send_evt_env;
+  ms.env = send_evt_env;
   return 1;
 }
 
-static int handle_recvevt(vmc_t *vmc){
-  cam_value_t channel_cam = vmc->contexts[vmc->current_running_context_id].env;
+static int handle_recvevt(void){
+  cam_value_t channel_cam = ms.env;
 
   UUID channel_id = (UUID)channel_cam.value;
 
   event_t recv_evt;
-  int j = recvEvt(vmc, &channel_id, &recv_evt);
+  int j = recvEvt(ms.vmc, &channel_id, &recv_evt);
   if(j == -1){
     DEBUG_PRINT(("Error with recvEvt \n"));
     return j;
@@ -1284,38 +1282,35 @@ static int handle_recvevt(vmc_t *vmc){
 
   cam_value_t recv_evt_env =
     { .value = (UINT)recv_evt, .flags = VALUE_PTR_BIT };
-  vmc->contexts[vmc->current_running_context_id].env = recv_evt_env;
+  ms.env = recv_evt_env;
   return 1;
 }
 
-static int handle_sync(vmc_t *vmc){
-  cam_value_t event_env = vmc->contexts[vmc->current_running_context_id].env;
+static int handle_sync(void){
+  cam_value_t event_env = ms.env;
 
   if(event_env.flags != VALUE_PTR_BIT){
-    DEBUG_PRINT(("Thread number : %u", vmc->current_running_context_id));
+    DEBUG_PRINT(("Thread number : %u", ms.vmc->current_running_context_id));
     DEBUG_PRINT(("Pointer not found in the environment register \n"));
     return -1;
   }
 
   event_t evt = (event_t)event_env.value;
 
-  int j = sync(vmc, &evt);
+  int j = sync(ms.vmc, &evt);
   if(j == -1){
     DEBUG_PRINT(("Error in synchronisation \n"));
     return j;
   }
 
   return 1;
-
-
 }
 
-static int handle_choose(vmc_t *vmc){
-  cam_value_t e2 = vmc->contexts[vmc->current_running_context_id].env;
+static int handle_choose(void){
+  cam_value_t e2 = ms.env;
 
   cam_register_t e1;
-  int i =
-    stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &e1);
+  int i = spop(&e1);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
     return -1;
@@ -1326,55 +1321,49 @@ static int handle_choose(vmc_t *vmc){
 
   event_t final_evt;
 
-  choose(vmc, &evt1, &evt2, &final_evt);
+  choose(ms.vmc, &evt1, &evt2, &final_evt);
 
   cam_value_t final_evt_cam =
     { .value = (UINT)final_evt, .flags = VALUE_PTR_BIT };
 
-  vmc->contexts[vmc->current_running_context_id].env = final_evt_cam;
-
+  ms.env = final_evt_cam;
   return 1;
-
 }
 
-static int handle_spawnExternal(vmc_t *vmc){
+static int handle_spawnExternal(void){
 
   //spawnExternal : Channel a -> Int -> ()
 
-  cam_value_t driver_details =
-    vmc->contexts[vmc->current_running_context_id].env;
+  cam_value_t driver_details = ms.env;
 
   cam_register_t hold_reg;
   int i =
-    stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+    spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
     return -1;
   }
   UUID chan_id = (UUID)hold_reg.value;
 
-  if(vmc->drivers[driver_details.value].is_synchronous){
+  if(ms.vmc->drivers[driver_details.value].is_synchronous){
     // synchronous driver like LEDs
-    vmc->channels[chan_id].sync_driver_no = (UUID)driver_details.value;
+    ms.vmc->channels[chan_id].sync_driver_no = (UUID)driver_details.value;
   } else {
     // asynchronous drivers like buttons
-    vmc->drivers[driver_details.value].channel_id = chan_id;
+    ms.vmc->drivers[driver_details.value].channel_id = chan_id;
   }
-
   return 1;
-
 }
 
-static int handle_wrap(vmc_t *vmc){
+static int handle_wrap(void){
 
   //wrap : Event a -> (a -> b) -> Event b
 
-  cam_value_t wrapf_ptr =
-    vmc->contexts[vmc->current_running_context_id].env;
+  cam_value_t wrapf_ptr = ms.env;
 
   cam_register_t hold_reg;
   int i =
-    stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+    spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
     return -1;
@@ -1385,42 +1374,40 @@ static int handle_wrap(vmc_t *vmc){
   // current_evt is a base event; so traversal of event not needed
 
   // get pointer to cam_event_t
-  cam_value_t cevt_ptr = heap_fst(&vmc->heap, (heap_index)current_evt);
+  cam_value_t cevt_ptr = heap_fst(ms.heap, (heap_index)current_evt);
   // get pointer to base_event_t
-  cam_value_t bevt_ptr = heap_fst(&vmc->heap, (heap_index)cevt_ptr.value);
+  cam_value_t bevt_ptr = heap_fst(ms.heap, (heap_index)cevt_ptr.value);
   // set the second of the cell that bevt_ptr is pointing to wrapf_ptr
   heap_set_snd(ms.heap, (heap_index)bevt_ptr.value, wrapf_ptr);
 
   //Place the modified event on the environment
   cam_value_t new_env = { .value = (UINT)current_evt, .flags = VALUE_PTR_BIT };
-  vmc->contexts[vmc->current_running_context_id].env = new_env;
+  ms.env = new_env;
 
   return 1;
-
 }
 
-static int handle_time(vmc_t *vmc){
+static int handle_time(void){
 
   //syncT : Time -> Time -> Event a -> a
 
-  cam_value_t hold_reg1 = vmc->contexts[vmc->current_running_context_id].env;
+  cam_value_t hold_reg1 = ms.env;
 
   cam_register_t hold_reg2;
-  int i =
-    stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg2);
+  int i = spop(&hold_reg2);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
     return -1;
   }
 
   cam_register_t hold_reg3;
-  int j =
-    stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg3);
+  int j = spop(&hold_reg3);
   if(j == 0){
     DEBUG_PRINT(("Stack pop has failed"));
     return -1;
   }
 
+  /* How does this work? The cam values are just 32 bit */
   Time baseline = (Time)hold_reg1.value;
 
   Time deadline = (Time)hold_reg2.value;
@@ -1428,21 +1415,18 @@ static int handle_time(vmc_t *vmc){
   // After calling the rts function `time` make sure the
   // env register points to `ev` so that we can `sync` next
   // because the sequence of bytecode will be - ..time; sync...
-  vmc->contexts[vmc->current_running_context_id].env = hold_reg3;
+  ms.env = hold_reg3;
 
-  int k = time(vmc, baseline, deadline);
+  int k = time(ms.vmc, baseline, deadline);
   if(k == -1){
     DEBUG_PRINT(("Error with syncT \n"));
     return k;
   }
-
-
   return 1;
 
   //FUTURE WORK
   //TODO: hold_reg1 and hold_reg2 should contain indices to the int pool
   // find index of 64 bit int baseline and deadline from the int pool
-
 }
 
 void eval_callrts(void) {
