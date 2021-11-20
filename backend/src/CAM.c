@@ -174,9 +174,9 @@ eval_fun evaluators[] =
 
 typedef struct {
   /* Changes per context */
-  register UINT pc;
-  register cam_register_t env;
-  register UINT sp;
+  UINT pc;
+  cam_register_t env;
+  UINT sp;
 
 
   UINT *stack_data;
