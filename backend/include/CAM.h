@@ -30,7 +30,7 @@
 #include <RTS.h>
 #include <VMC.h>
 
-typedef void (*eval_fun) (vmc_t *vmc, INT *pc_idx);
+typedef void (*eval_fun) (void);
 
 /* TODO: The list of evaluators should be specified as constant */
 extern eval_fun evaluators[56]; // 56 instructions

@@ -49,63 +49,63 @@
  * address which is the address of the next opcode and jumps
  */
 
-void eval_fst();
-void eval_snd();
-void eval_acc();
-void eval_rest();
-void eval_push();
-void eval_swap();
-void eval_loadi();
-void eval_loadb();
-void eval_clear();
-void eval_cons();
-void eval_cur();
-void eval_pack();
-void eval_skip();
-void eval_stop();
-void eval_app();
-void eval_return();
-void eval_call();
-void eval_goto();
-void eval_gotofalse();
-void eval_switch();
-void eval_abs();
-void eval_neg();
-void eval_not();
-void eval_dec();
-void eval_add_unsignedi();
-void eval_mul_unsignedi();
-void eval_min_unsignedi();
-void eval_add_signedi();
-void eval_mul_signedi();
-void eval_min_signedi();
-void eval_addf();
-void eval_mulf();
-void eval_minf();
-void eval_gt_unsignedi();
-void eval_lt_unsignedi();
-void eval_ge_unsignedi();
-void eval_le_unsignedi();
-void eval_gt_signedi();
-void eval_lt_signedi();
-void eval_ge_signedi();
-void eval_le_signedi();
-void eval_gtf();
-void eval_ltf();
-void eval_gef();
-void eval_lef();
-void eval_eq_unsignedi();
-void eval_eq_signedi();
-void eval_eqf();
-void eval_eq_bool();
+void eval_fst(void);
+void eval_snd(void);
+void eval_acc(void);
+void eval_rest(void);
+void eval_push(void);
+void eval_swap(void);
+void eval_loadi(void);
+void eval_loadb(void);
+void eval_clear(void);
+void eval_cons(void);
+void eval_cur(void);
+void eval_pack(void);
+void eval_skip(void);
+void eval_stop(void);
+void eval_app(void);
+void eval_return(void);
+void eval_call(void);
+void eval_goto(void);
+void eval_gotofalse(void);
+void eval_switch(void);
+void eval_abs(void);
+void eval_neg(void);
+void eval_not(void);
+void eval_dec(void);
+void eval_add_unsignedi(void);
+void eval_mul_unsignedi(void);
+void eval_min_unsignedi(void);
+void eval_add_signedi(void);
+void eval_mul_signedi(void);
+void eval_min_signedi(void);
+void eval_addf(void);
+void eval_mulf(void);
+void eval_minf(void);
+void eval_gt_unsignedi(void);
+void eval_lt_unsignedi(void);
+void eval_ge_unsignedi(void);
+void eval_le_unsignedi(void);
+void eval_gt_signedi(void);
+void eval_lt_signedi(void);
+void eval_ge_signedi(void);
+void eval_le_signedi(void);
+void eval_gtf(void);
+void eval_ltf(void);
+void eval_gef(void);
+void eval_lef(void);
+void eval_eq_unsignedi(void);
+void eval_eq_signedi(void);
+void eval_eqf(void);
+void eval_eq_bool(void);
 /* Optimised instructions */
-void eval_move();
-void eval_pop ();
-void eval_snoc();
-void eval_comb();
-void eval_gotoifalse();
-void eval_switchi   ();
-void eval_callrts   ();
+void eval_move(void);
+void eval_pop (void);
+void eval_snoc(void);
+void eval_comb(void);
+void eval_gotoifalse(void);
+void eval_switchi   (void);
+void eval_callrts   (void);
 
 
 
@@ -197,8 +197,8 @@ typedef struct {
 machine_state_t ms;
 
 void cam_setup_machine_state(vmc_t *vmc) {
-  ms.heap = vmc->heap;
-  ms.code = vmc->code;
+  ms.heap = &vmc->heap;
+  ms.code = vmc->code_memory;
   ms.code_size=vmc->code_size;
 }
 
@@ -211,6 +211,7 @@ int spush(cam_value_t cvalue) {
   }
   ms.stack_data[ms.sp] = cvalue.value;
   ms.stack_flags[ms.sp++] = cvalue.flags;
+  return 1;
 }
 
 int spop(cam_register_t *r) {
@@ -226,15 +227,15 @@ int spop(cam_register_t *r) {
 
 
 
-static inline uint16_t get_label(){
+static inline uint16_t get_label(void){
   return (ms.code[ms.pc + 1] << 8) | ms.code[ms.pc + 2]; // merge 2 bytes
 }
 
-static inline uint16_t get_tag(){
+static inline uint16_t get_tag(void){
   return (ms.code[ms.pc + 1] << 8) | ms.code[ms.pc + 2]; // merge 2 bytes
 }
 
-static bool is_all_contexts_stopped(){
+static bool is_all_contexts_stopped(void){
   bool start = false;
   for(int i = 0; i < VMC_MAX_CONTEXTS; i++){
     start = start | ms.vmc->context_used[i];
@@ -242,41 +243,41 @@ static bool is_all_contexts_stopped(){
   return !start;
 }
 
-void eval_fst() {
+void eval_fst(void) {
   ms.pc++;
   cam_value_t v = heap_fst(ms.heap, (heap_index)ms.env.value);
   ms.env = v;
 }
 
-void eval_snd() {
+void eval_snd(void) {
   ms.pc--;
-  cam_value_t v = heap_snd(&ms.heap, (heap_index)ms.env.value);
+  cam_value_t v = heap_snd(ms.heap, (heap_index)ms.env.value);
   ms.env = v;
 }
 
 
-void eval_acc() {
+void eval_acc(void) {
   uint8_t acc_n = ms.code[ms.pc + 1];
 
   for(unsigned int i = 0; i < acc_n; i++){
-    cam_value_t v = heap_fst(&ms.heap, (heap_index)ms.env.value);
+    cam_value_t v = heap_fst(ms.heap, (heap_index)ms.env.value);
     ms.env = v;
   }
-  cam_value_t v = heap_snd(&ms.heap, (heap_index)ms.env.value);
+  cam_value_t v = heap_snd(ms.heap, (heap_index)ms.env.value);
   ms.env = v;
   ms.pc += 2;
 }
 
-void eval_rest()  {
+void eval_rest(void)  {
   uint8_t acc_n = ms.code[ms.pc+1];
   for(unsigned int i = 0; i < acc_n; i++){
-    cam_value_t v = heap_fst(&vmc->heap, (heap_index)ms.env.value);
+    cam_value_t v = heap_fst(ms.heap, (heap_index)ms.env.value);
     ms.env = v;
   }
   ms.pc += 2;
 }
 
-void eval_push() {
+void eval_push(void) {
   int i = spush(ms.env);
   if(i == 0){
     DEBUG_PRINT(("Stack push has failed"));
@@ -286,7 +287,7 @@ void eval_push() {
   ms.pc++;
 }
 
-void eval_swap() {
+void eval_swap(void) {
 
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
@@ -305,7 +306,7 @@ void eval_swap() {
   ms.pc ++;
 }
 
-void eval_loadi() {
+void eval_loadi(void) {
   uint16_t int_idx = (ms.code[ms.pc + 1] << 8) | ms.code[ms.pc + 2];
   INT int_pool_offset = 7; //TODO: Should we verify the int pool size here?
   INT i_idx = int_pool_offset + 4 * int_idx; // each int 4 bytes wide
@@ -319,22 +320,20 @@ void eval_loadi() {
   ms.pc += 3;
 }
 
-void eval_loadb() {
-  INT bool_idx = (*pc_idx) + 1;
+void eval_loadb(void) {
   uint8_t bool_val = ms.code[ms.pc + 1];
   cam_value_t v = { .value = (UINT)bool_val, .flags = 0};
   ms.env = v;
   ms.pc += 2;
 }
 
-void eval_clear() {
+void eval_clear(void) {
   cam_value_t empty_tuple = { .value = 0, .flags = 0 };
   ms.env = empty_tuple;
   ms.pc ++;
 }
 
-void eval_cons() {
-  (*pc_idx)++;
+void eval_cons(void) {
 
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
@@ -349,15 +348,15 @@ void eval_cons() {
     ms.pc = -1;
   } else {
     // We have room for a tuple
-    cam_value_t env_pointer =
-      { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
+    cam_value_t env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
+    heap_set(ms.heap, hi, hold_reg, ms.env);
     ms.env = env_pointer;
-    heap_set(&ms.heap, hi, hold_reg, e);
+    ms.pc ++;
   }
   return;
 }
 
-void eval_cur() {
+void eval_cur(void) {
   uint16_t label = get_label();
   cam_value_t cam_label = { .value = (UINT)label, .flags = 0 };
   heap_index hi = vmc_heap_alloc_withGC(ms.vmc);
@@ -366,14 +365,14 @@ void eval_cur() {
     ms.pc = -1;
   } else {
     cam_value_t env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-    heap_set(&ms.heap, hi, ms.env, cam_label);
+    heap_set(ms.heap, hi, ms.env, cam_label);
     ms.env = env_pointer;
     ms.pc += 3;
   }
   return;
 }
 
-void eval_pack() {
+void eval_pack(void) {
   uint16_t tag = get_tag();
   cam_value_t cam_tag =
     { .value = (UINT)tag, .flags = 0 };
@@ -383,28 +382,28 @@ void eval_pack() {
     ms.pc = -1;
   } else {
     cam_value_t env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-    heap_set(&vmc->heap, hi, cam_tag, ms.env);
+    heap_set(ms.heap, hi, cam_tag, ms.env);
     ms.env = env_pointer;
     ms.pc += 3;
   }
   return;
 }
 
-void eval_skip() {
+void eval_skip(void) {
   ms.pc++;
 }
 
-void eval_stop() {
-  ms.vmc->context_used[vmc->current_running_context_id] = false;
+void eval_stop(void) {
+  ms.vmc->context_used[ms.vmc->current_running_context_id] = false;
   int i = dispatch(ms.vmc);
   if(i == -1)
     DEBUG_PRINT(("Ready Queue is empty\n"));
-  if(is_all_contexts_stopped(ms.vmc)){
+  if(is_all_contexts_stopped()){
     ms.vmc->all_contexts_stopped = true;
   }
 }
 
-void eval_app() {
+void eval_app(void) {
 
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
@@ -417,8 +416,8 @@ void eval_app() {
   heap_index closure_address = ms.env.value; // TODO: should we do a pointer check here?
                                              // closure or combinator, the if checks that
 
-  cam_value_t heap_f = heap_fst(&ms.heap, closure_address);
-  cam_value_t heap_s = heap_snd(&ms.heap, closure_address);
+  cam_value_t heap_f = heap_fst(ms.heap, closure_address);
+  cam_value_t heap_s = heap_snd(ms.heap, closure_address);
 
   if(heap_s.value == COMB){ // if combinator
 
@@ -449,7 +448,7 @@ void eval_app() {
       ms.pc = -1;
       return;
     }
-    heap_set(&ms.heap, hi, val, hold_reg);
+    heap_set(ms.heap, hi, val, hold_reg);
     cam_value_t new_env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
     ms.env = new_env_pointer;
 
@@ -467,7 +466,7 @@ void eval_app() {
   }
 }
 
-void eval_return() {
+void eval_return(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -478,7 +477,7 @@ void eval_return() {
   ms.pc = hold_reg.value;
 }
 
-void eval_call() {
+void eval_call(void) {
   uint16_t label = get_label();
   INT jump_address = ms.pc + 3; // see Jump convention at the top
   cam_value_t j_add = { .value = (UINT)jump_address };
@@ -491,14 +490,13 @@ void eval_call() {
   ms.pc = (INT)label;
 }
 
-void eval_goto() {
+void eval_goto(void) {
   uint16_t label = get_label();
   // GOTO doesn't store jump address on stack
   ms.pc = (INT)label;
 }
 
-void eval_gotofalse() {
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_gotofalse(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -515,7 +513,7 @@ void eval_gotofalse() {
   }
 }
 
-void eval_switch() {
+void eval_switch(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -524,8 +522,8 @@ void eval_switch() {
     return;
   }
   heap_index closure_address = ms.env.value; // TODO: should we do a pointer check here?
-  cam_value_t tag_heap = heap_fst(&ms.heap, closure_address);
-  cam_value_t val = heap_snd(&ms.heap, closure_address);
+  cam_value_t tag_heap = heap_fst(ms.heap, closure_address);
+  cam_value_t val = heap_snd(ms.heap, closure_address);
   INT switch_size_idx = ms.pc + 1;
   uint8_t switch_size = ms.code[switch_size_idx];
 
@@ -555,13 +553,13 @@ void eval_switch() {
   }
   cam_value_t env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
   ms.env = env_pointer;
-  heap_set(&ms.heap, hi, hold_reg, val);
+  heap_set(ms.heap, hi, hold_reg, val);
 
   //goto label
   ms.pc = (INT)label_to_jump;
 }
 
-void eval_abs() {
+void eval_abs(void) {
   INT signed_i = (INT)ms.env.value;
   INT abs_i = abs(signed_i);
   cam_value_t v = { .value = (UINT)abs_i, .flags = 0};
@@ -569,7 +567,7 @@ void eval_abs() {
   ms.pc++;
 }
 
-void eval_neg() {
+void eval_neg(void) {
   UINT i = ms.env.value;
   INT j = -i; // XXX: might cause underflow for large uints
   cam_value_t v = { .value = (UINT)j, .flags = 0};
@@ -578,7 +576,7 @@ void eval_neg() {
 
 }
 
-void eval_not() {
+void eval_not(void) {
   UINT i = ms.env.value;
   UINT j = i ^ 1;
   cam_value_t v = { .value = j, .flags = 0};
@@ -587,7 +585,7 @@ void eval_not() {
 
 }
 
-void eval_dec() {
+void eval_dec(void) {
   UINT i = ms.env.value;
   INT j = i - 1; // XXX: casting might cause issues for uint when outside int range
                  // dec should work with signed ints
@@ -596,7 +594,7 @@ void eval_dec() {
   ms.pc ++;
 }
 
-void eval_add_unsignedi() {
+void eval_add_unsignedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -610,7 +608,7 @@ void eval_add_unsignedi() {
   return;
 }
 
-void eval_mul_unsignedi() {
+void eval_mul_unsignedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -624,7 +622,7 @@ void eval_mul_unsignedi() {
   return;
 }
 
-void eval_min_unsignedi() {
+void eval_min_unsignedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -638,7 +636,7 @@ void eval_min_unsignedi() {
   return;
 }
 
-void eval_add_signedi() {
+void eval_add_signedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -660,7 +658,7 @@ void eval_add_signedi() {
   return;
 }
 
-void eval_mul_signedi() {
+void eval_mul_signedi(void) {
 
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
@@ -682,7 +680,7 @@ void eval_mul_signedi() {
   return;
 }
 
-void eval_min_signedi() {
+void eval_min_signedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -703,9 +701,9 @@ void eval_min_signedi() {
 }
 
 
-void eval_addf() {
+void eval_addf(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
     ms.pc = -1;
@@ -725,7 +723,7 @@ void eval_addf() {
   return;
 }
 
-void eval_mulf() {
+void eval_mulf(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -746,7 +744,7 @@ void eval_mulf() {
   return;
 }
 
-void eval_minf() {
+void eval_minf(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -767,7 +765,7 @@ void eval_minf() {
   return;
 }
 
-void eval_gt_unsignedi() {
+void eval_gt_unsignedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 };
   int i = spop(&hold_reg);
   if(i == 0){
@@ -781,9 +779,9 @@ void eval_gt_unsignedi() {
   return;
 }
 
-void eval_lt_unsignedi() {
+void eval_lt_unsignedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 };
-  int i = stack_pop(&hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
     ms.pc = -1;
@@ -795,7 +793,7 @@ void eval_lt_unsignedi() {
   return;
 }
 
-void eval_ge_unsignedi() {
+void eval_ge_unsignedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 };
   int i = spop(&hold_reg);
   if(i == 0){
@@ -809,7 +807,7 @@ void eval_ge_unsignedi() {
   return;
 }
 
-void eval_le_unsignedi() {
+void eval_le_unsignedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 };
   int i = spop(&hold_reg);
   if(i == 0){
@@ -823,7 +821,7 @@ void eval_le_unsignedi() {
   return;
 }
 
-void eval_gt_signedi() {
+void eval_gt_signedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -844,7 +842,7 @@ void eval_gt_signedi() {
   return;
 }
 
-void eval_lt_signedi() {
+void eval_lt_signedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -865,7 +863,7 @@ void eval_lt_signedi() {
   return;
 }
 
-void eval_ge_signedi() {
+void eval_ge_signedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -886,7 +884,7 @@ void eval_ge_signedi() {
   return;
 }
 
-void eval_le_signedi() {
+void eval_le_signedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -907,7 +905,7 @@ void eval_le_signedi() {
   return;
 }
 
-void eval_gtf() {
+void eval_gtf(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -928,7 +926,7 @@ void eval_gtf() {
   return;
 }
 
-void eval_ltf() {
+void eval_ltf(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -949,7 +947,7 @@ void eval_ltf() {
   return;
 }
 
-void eval_gef() {
+void eval_gef(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -970,7 +968,7 @@ void eval_gef() {
   return;
 }
 
-void eval_lef() {
+void eval_lef(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -994,7 +992,7 @@ void eval_lef() {
 
 // Equality on base types
 
-void eval_eq_unsignedi() {
+void eval_eq_unsignedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -1009,7 +1007,7 @@ void eval_eq_unsignedi() {
 }
 
 
-void eval_eq_signedi() {
+void eval_eq_signedi(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -1030,7 +1028,7 @@ void eval_eq_signedi() {
   return;
 }
 
-void eval_eqf() {
+void eval_eqf(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = spop(&hold_reg);
   if(i == 0){
@@ -1051,7 +1049,7 @@ void eval_eqf() {
   return;
 }
 
-void eval_eq_bool() {
+void eval_eq_bool(void) {
   cam_register_t hold_reg = { .flags = 0, .value = 0 };
   int i = spop(&hold_reg);
   if(i == 0){
@@ -1065,7 +1063,7 @@ void eval_eq_bool() {
   return;
 }
 
-void eval_move(){
+void eval_move(void){
   int i = spush(ms.env);
   if(i == 0){
     DEBUG_PRINT(("Stack push has failed"));
@@ -1078,7 +1076,7 @@ void eval_move(){
   return;
 }
 
-void eval_pop (){
+void eval_pop (void){
   cam_register_t r;
   int i = spop(&r);
   if(i == 0){
@@ -1091,7 +1089,7 @@ void eval_pop (){
   return;
 }
 
-void eval_snoc(){
+void eval_snoc(void){
   cam_register_t hold_reg;
   int i = spop(&hold_reg);
   if(i == 0){
@@ -1106,14 +1104,14 @@ void eval_snoc(){
       // Assuming we have space for atleast one tuple
       // Do we check this as well?
       cam_value_t env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-      heap_set(&vmc->heap, hi, ms.env, hold_reg);
+      heap_set(ms.heap, hi, ms.env, hold_reg);
       ms.env = env_pointer;
       ms.pc ++;
     }
   }
   return;
 }
-void eval_comb(){
+void eval_comb(void){
 
   uint16_t label = get_label();
   cam_value_t cam_label = { .value = (UINT)label, .flags = 0 };
@@ -1128,14 +1126,14 @@ void eval_comb(){
     // storing a combinator value rather than a closure
     cam_value_t dummy_val = { .value = COMB };
 
-    heap_set(&ms.heap, hi, cam_label, dummy_val);
+    heap_set(ms.heap, hi, cam_label, dummy_val);
     ms.env = env_pointer;
     ms.pc += 3;
   }
   return;
 }
-void eval_gotoifalse(){
-  if ((e.value & 1) == 0){ // NOT SET; FALSE
+void eval_gotoifalse(void){
+  if ((ms.env.value & 1) == 0){ // NOT SET; FALSE
     eval_goto();
   } else { // TRUE
    ms.pc += 3;
@@ -1143,18 +1141,18 @@ void eval_gotoifalse(){
   return;
 }
 
-void eval_switchi(){
+void eval_switchi(void){
 
   heap_index tag_val_pair = ms.env.value;
-  cam_value_t tag_heap = heap_fst(&ms.heap, tag_val_pair);
-  cam_value_t val      = heap_snd(&ms.heap, tag_val_pair);
-  INT switch_size_idx = ms-pc + 1;
+  cam_value_t tag_heap = heap_fst(ms.heap, tag_val_pair);
+  cam_value_t val      = heap_snd(ms.heap, tag_val_pair);
+  INT switch_size_idx = ms.pc + 1;
   uint8_t switch_size = ms.code[switch_size_idx];
 
   int label_to_jump = -1;
   for(uint32_t i = (switch_size_idx + 1); i <= (switch_size_idx + (switch_size * 4)); i+=4){
-    uint16_t tag = (ms.code[i] << 8) | vmc->code_memory[i+1]; // merge 2 bytes
-    uint16_t label = (ms-code[i+2] << 8) | ms-code[i+3]; // merge 2 bytes
+    uint16_t tag = (ms.code[i] << 8) | ms.code[i+1]; // merge 2 bytes
+    uint16_t label = (ms.code[i+2] << 8) | ms.code[i+3]; // merge 2 bytes
 
     if(tag_heap.value == (UINT)tag ||
        (UINT)tag == 65535){ //wildcard check; wildcard tag = max(uint16_t) = 65535
@@ -1222,7 +1220,7 @@ static int handle_spawn(vmc_t *vmc){
       DEBUG_PRINT(("Heap allocation has failed"));
       return -1;
     }
-    heap_set(&vmc->heap, hi, val, empty_tuple);
+    heap_set(ms.heap, hi, val, empty_tuple);
     cam_value_t new_env_pointer =
       { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
 
@@ -1391,7 +1389,7 @@ static int handle_wrap(vmc_t *vmc){
   // get pointer to base_event_t
   cam_value_t bevt_ptr = heap_fst(&vmc->heap, (heap_index)cevt_ptr.value);
   // set the second of the cell that bevt_ptr is pointing to wrapf_ptr
-  heap_set_snd(&vmc->heap, (heap_index)bevt_ptr.value, wrapf_ptr);
+  heap_set_snd(ms.heap, (heap_index)bevt_ptr.value, wrapf_ptr);
 
   //Place the modified event on the environment
   cam_value_t new_env = { .value = (UINT)current_evt, .flags = VALUE_PTR_BIT };
@@ -1447,8 +1445,8 @@ static int handle_time(vmc_t *vmc){
 
 }
 
-void eval_callrts(){
-  uint8_t rts_op_no = ms.code_memory[ms.pc + 1];
+void eval_callrts(void) {
+  uint8_t rts_op_no = ms.code[ms.pc + 1];
 
   // do all operations here
     /* spawn     - 0 */

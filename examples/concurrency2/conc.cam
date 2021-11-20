@@ -15,4 +15,5 @@ bar _ =
 
 main =
   let _ = spawn foo in
-  foo ()
+  let _ = spawn bar in
+  ()
