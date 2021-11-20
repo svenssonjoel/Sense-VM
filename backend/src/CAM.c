@@ -238,6 +238,31 @@ int cam_step(void) {
 /* kinds of errors. out of memory for example */
 
 
+/* A context switch will now be somewhat more expensive       */
+/* But if we run some number of instructions between switches */
+/* this should quickly be amortized.
+                          */
+int cam_context_switch(UUID ctx) {
+  
+  /* copy the running context values into VMC context structures */
+  ms.vmc->contexts[ms.vmc->current_running_context_id].env = ms.env;
+  ms.vmc->contexts[ms.vmc->current_running_context_id].pc = ms.pc;
+  ms.vmc->contexts[ms.vmc->current_running_context_id].stack.sp = ms.sp;
+  
+  /* copy the target context values into machine state */
+  ms.vmc->current_running_context_id = ctx;
+  ms.env = ms.vmc->contexts[ctx].env;
+  ms.pc  = ms.vmc->contexts[ctx].pc;
+  ms.sp  = ms.vmc->contexts[ctx].stack.sp;
+
+  ms.stack_data  = ms.vmc->contexts[ctx].stack.data;
+  ms.stack_flags = ms.vmc->contexts[ctx].stack.flags;
+  ms.stack_size  = ms.vmc->contexts[ctx].stack.size;
+
+  return 1; /* TODO: error checking */
+}
+
+
 
 /********************************/
 /* Stack manipulation functions */

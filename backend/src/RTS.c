@@ -2,7 +2,7 @@
 /**********************************************************************************/
 /* MIT License									  */
 /* 										  */
-/* Copyright (c) 2020 Abhiroop Sarkar                            		  */
+/* Copyright (c) 2020, 2021 Abhiroop Sarkar, Bo Joel Svensson                            		  */
 /* 										  */
 /* Permission is hereby granted, free of charge, to any person obtaining a copy	  */
 /* of this software and associated documentation files (the "Software"), to deal  */
@@ -354,7 +354,8 @@ int dispatch(vmc_t *container){
     return -1;
   }
   DEBUG_PRINT(("Switching to thread : %u\n", thread_info.context_id));
-  container->current_running_context_id = thread_info.context_id;
+  cam_context_switch(thread_info.context_id);
+  //container->current_running_context_id = thread_info.context_id;
   return 1;
 }
 
@@ -589,7 +590,8 @@ static int synchronizeNow(vmc_t *container, cam_event_t cev){
     /* NOTE Post synchronization actions ends */
 
     // the receiving thread will run now
-    container->current_running_context_id = recv_context_id;
+    //container->current_running_context_id = recv_context_id;
+    cam_context_switch(recv_context_id);
     DEBUG_PRINT(("Context switch\n"));
 
     return 1;
@@ -1098,7 +1100,8 @@ static int handle_driver_msg(vmc_t *vmc, svm_msg_t *m){
 
 
   // the receiving thread will run now
-  vmc->current_running_context_id = recv_context_id;
+  cam_context_switch(recv_context_id);
+  //vmc->current_running_context_id = recv_context_id;
 
   return 1;
 
@@ -1174,7 +1177,8 @@ static int handle_timer_msg(vmc_t *vmc){
   //Step 4. If no threads are running schedule the thread
   //        for which the interrupt arrived
   if(vmc->current_running_context_id == UUID_NONE){
-    vmc->current_running_context_id = timedThread.context_id;
+    cam_context_switch(timedThread.context_id);
+    //vmc->current_running_context_id = timedThread.context_id;
   } else {
     // Some thread is running
 
@@ -1196,7 +1200,8 @@ static int handle_timer_msg(vmc_t *vmc){
       }
 
       // Step 5.2 Put the timed thread as currently running
-      vmc->current_running_context_id = timedThread.context_id;
+      cam_context_switch(timedThread.context_id);
+      //vmc->current_running_context_id = timedThread.context_id;
 
     } else {
 

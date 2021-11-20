@@ -37,5 +37,6 @@ extern eval_fun evaluators[56]; // 56 instructions
 
 extern void cam_setup_machine(vmc_t *vmc);
 extern int  cam_step(void);
+extern int  cam_context_switch(UUID ctx);
 
 #endif
