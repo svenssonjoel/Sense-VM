@@ -1,7 +1,7 @@
 /**********************************************************************************/
 /* MIT License									  */
 /* 										  */
-/* Copyright (c) 2020 Joel Svensson, Abhiroop Sarkar 				  */
+/* Copyright (c) 2020, 2021 Joel Svensson, Abhiroop Sarkar 				  */
 /* 										  */
 /* Permission is hereby granted, free of charge, to any person obtaining a copy	  */
 /* of this software and associated documentation files (the "Software"), to deal  */
@@ -49,63 +49,63 @@
  * address which is the address of the next opcode and jumps
  */
 
-void eval_fst(vmc_t *vmc, INT *pc_idx);
-void eval_snd(vmc_t *vmc, INT *pc_idx);
-void eval_acc(vmc_t *vmc, INT *pc_idx);
-void eval_rest(vmc_t *vmc, INT *pc_idx);
-void eval_push(vmc_t *vmc, INT *pc_idx);
-void eval_swap(vmc_t *vmc, INT *pc_idx);
-void eval_loadi(vmc_t *vmc, INT *pc_idx);
-void eval_loadb(vmc_t *vmc, INT *pc_idx);
-void eval_clear(vmc_t *vmc, INT *pc_idx);
-void eval_cons(vmc_t *vmc, INT *pc_idx);
-void eval_cur(vmc_t *vmc, INT *pc_idx);
-void eval_pack(vmc_t *vmc, INT *pc_idx);
-void eval_skip(vmc_t *vmc, INT *pc_idx);
-void eval_stop(vmc_t *vmc, INT *pc_idx);
-void eval_app(vmc_t *vmc, INT *pc_idx);
-void eval_return(vmc_t *vmc, INT *pc_idx);
-void eval_call(vmc_t *vmc, INT *pc_idx);
-void eval_goto(vmc_t *vmc, INT *pc_idx);
-void eval_gotofalse(vmc_t *vmc, INT *pc_idx);
-void eval_switch(vmc_t *vmc, INT *pc_idx);
-void eval_abs(vmc_t *vmc, INT *pc_idx);
-void eval_neg(vmc_t *vmc, INT *pc_idx);
-void eval_not(vmc_t *vmc, INT *pc_idx);
-void eval_dec(vmc_t *vmc, INT *pc_idx);
-void eval_add_unsignedi(vmc_t *vmc, INT *pc_idx);
-void eval_mul_unsignedi(vmc_t *vmc, INT *pc_idx);
-void eval_min_unsignedi(vmc_t *vmc, INT *pc_idx);
-void eval_add_signedi(vmc_t *vmc, INT *pc_idx);
-void eval_mul_signedi(vmc_t *vmc, INT *pc_idx);
-void eval_min_signedi(vmc_t *vmc, INT *pc_idx);
-void eval_addf(vmc_t *vmc, INT *pc_idx);
-void eval_mulf(vmc_t *vmc, INT *pc_idx);
-void eval_minf(vmc_t *vmc, INT *pc_idx);
-void eval_gt_unsignedi(vmc_t *vmc, INT *pc_idx);
-void eval_lt_unsignedi(vmc_t *vmc, INT *pc_idx);
-void eval_ge_unsignedi(vmc_t *vmc, INT *pc_idx);
-void eval_le_unsignedi(vmc_t *vmc, INT *pc_idx);
-void eval_gt_signedi(vmc_t *vmc, INT *pc_idx);
-void eval_lt_signedi(vmc_t *vmc, INT *pc_idx);
-void eval_ge_signedi(vmc_t *vmc, INT *pc_idx);
-void eval_le_signedi(vmc_t *vmc, INT *pc_idx);
-void eval_gtf(vmc_t *vmc, INT *pc_idx);
-void eval_ltf(vmc_t *vmc, INT *pc_idx);
-void eval_gef(vmc_t *vmc, INT *pc_idx);
-void eval_lef(vmc_t *vmc, INT *pc_idx);
-void eval_eq_unsignedi(vmc_t *vmc, INT *pc_idx);
-void eval_eq_signedi(vmc_t *vmc, INT *pc_idx);
-void eval_eqf(vmc_t *vmc, INT *pc_idx);
-void eval_eq_bool(vmc_t *vmc, INT *pc_idx);
+void eval_fst();
+void eval_snd();
+void eval_acc();
+void eval_rest();
+void eval_push();
+void eval_swap();
+void eval_loadi();
+void eval_loadb();
+void eval_clear();
+void eval_cons();
+void eval_cur();
+void eval_pack();
+void eval_skip();
+void eval_stop();
+void eval_app();
+void eval_return();
+void eval_call();
+void eval_goto();
+void eval_gotofalse();
+void eval_switch();
+void eval_abs();
+void eval_neg();
+void eval_not();
+void eval_dec();
+void eval_add_unsignedi();
+void eval_mul_unsignedi();
+void eval_min_unsignedi();
+void eval_add_signedi();
+void eval_mul_signedi();
+void eval_min_signedi();
+void eval_addf();
+void eval_mulf();
+void eval_minf();
+void eval_gt_unsignedi();
+void eval_lt_unsignedi();
+void eval_ge_unsignedi();
+void eval_le_unsignedi();
+void eval_gt_signedi();
+void eval_lt_signedi();
+void eval_ge_signedi();
+void eval_le_signedi();
+void eval_gtf();
+void eval_ltf();
+void eval_gef();
+void eval_lef();
+void eval_eq_unsignedi();
+void eval_eq_signedi();
+void eval_eqf();
+void eval_eq_bool();
 /* Optimised instructions */
-void eval_move(vmc_t *vmc, INT *pc_idx);
-void eval_pop (vmc_t *vmc, INT *pc_idx);
-void eval_snoc(vmc_t *vmc, INT *pc_idx);
-void eval_comb(vmc_t *vmc, INT *pc_idx);
-void eval_gotoifalse(vmc_t *vmc, INT *pc_idx);
-void eval_switchi   (vmc_t *vmc, INT *pc_idx);
-void eval_callrts   (vmc_t *vmc, INT *pc_idx);
+void eval_move();
+void eval_pop ();
+void eval_snoc();
+void eval_comb();
+void eval_gotoifalse();
+void eval_switchi   ();
+void eval_callrts   ();
 
 
 
@@ -169,352 +169,371 @@ eval_fun evaluators[] =
   };
 
 
-uint16_t get_label(vmc_t *vmc, INT *pc_idx){
-  INT lab_idx1 = (*pc_idx) + 1;
-  INT lab_idx2 = (*pc_idx) + 2;
-  uint16_t label =
-    (vmc->code_memory[lab_idx1] << 8) | vmc->code_memory[lab_idx2]; // merge 2 bytes
-  return label;
+/*******************************/
+/* Machine registers and state */
+
+typedef struct {
+  /* Changes per context */
+  register UINT pc;
+  register cam_register_t env;
+  register UINT sp;
+
+
+  UINT *stack_data;
+  value_flags_t *stack_flags;
+  UINT stack_size;
+
+
+  /* constant for each VMC */
+  const uint8_t *code;
+  UINT code_size;
+
+  heap_t *heap;
+
+  vmc_t *vmc;
+} machine_state_t;
+
+/* One of these per VMC later */
+machine_state_t ms;
+
+void cam_setup_machine_state(vmc_t *vmc) {
+  ms.heap = vmc->heap;
+  ms.code = vmc->code;
+  ms.code_size=vmc->code_size;
 }
 
-uint16_t get_tag(vmc_t *vmc, INT *pc_idx){
-  INT tag_idx1 = (*pc_idx) + 1;
-  INT tag_idx2 = (*pc_idx) + 2;
-  uint16_t tag =
-    (vmc->code_memory[tag_idx1] << 8) | vmc->code_memory[tag_idx2]; // merge 2 bytes
-  return tag;
+/********************************/
+/* Stack manipulation functions */
+int spush(cam_value_t cvalue) {
+  if (ms.sp == ms.stack_size) {
+    DEBUG_PRINT(("Stack Overflow\n"));
+    return 0;
+  }
+  ms.stack_data[ms.sp] = cvalue.value;
+  ms.stack_flags[ms.sp++] = cvalue.flags;
 }
 
-static bool is_all_contexts_stopped(vmc_t *vmc){
+int spop(cam_register_t *r) {
+  if (ms.sp == 0) {
+    DEBUG_PRINT(("Stack Underflow\n"));
+    return 0;
+  }
+  ms.sp--;
+  r->value = ms.stack_data[ms.sp];
+  r->flags = ms.stack_flags[ms.sp];
+  return 1;
+}
+
+
+
+static inline uint16_t get_label(){
+  return (ms.code[ms.pc + 1] << 8) | ms.code[ms.pc + 2]; // merge 2 bytes
+}
+
+static inline uint16_t get_tag(){
+  return (ms.code[ms.pc + 1] << 8) | ms.code[ms.pc + 2]; // merge 2 bytes
+}
+
+static bool is_all_contexts_stopped(){
   bool start = false;
   for(int i = 0; i < VMC_MAX_CONTEXTS; i++){
-    start = start | vmc->context_used[i];
+    start = start | ms.vmc->context_used[i];
   }
   return !start;
 }
 
-void eval_fst(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  cam_value_t v = heap_fst(&vmc->heap, (heap_index)e.value);
-  vmc->contexts[vmc->current_running_context_id].env = v;
+void eval_fst() {
+  ms.pc++;
+  cam_value_t v = heap_fst(ms.heap, (heap_index)ms.env.value);
+  ms.env = v;
 }
 
-void eval_snd(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  cam_value_t v = heap_snd(&vmc->heap, (heap_index)e.value);
-  vmc->contexts[vmc->current_running_context_id].env = v;
+void eval_snd() {
+  ms.pc--;
+  cam_value_t v = heap_snd(&ms.heap, (heap_index)ms.env.value);
+  ms.env = v;
 }
 
 
-void eval_acc(vmc_t *vmc, INT *pc_idx) {
-  INT n_idx = (*pc_idx) + 1;
-  uint8_t acc_n = vmc->code_memory[n_idx];
+void eval_acc() {
+  uint8_t acc_n = ms.code[ms.pc + 1];
+
   for(unsigned int i = 0; i < acc_n; i++){
-    cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-    cam_value_t v = heap_fst(&vmc->heap, (heap_index)e.value);
-    vmc->contexts[vmc->current_running_context_id].env = v;
+    cam_value_t v = heap_fst(&ms.heap, (heap_index)ms.env.value);
+    ms.env = v;
   }
-  cam_value_t v = heap_snd(&vmc->heap, (heap_index)vmc->contexts[vmc->current_running_context_id].env.value);
-  vmc->contexts[vmc->current_running_context_id].env = v;
-  *pc_idx = (*pc_idx) + 2;
+  cam_value_t v = heap_snd(&ms.heap, (heap_index)ms.env.value);
+  ms.env = v;
+  ms.pc += 2;
 }
 
-void eval_rest(vmc_t *vmc, INT *pc_idx)  {
-  INT n_idx = (*pc_idx) + 1;
-  uint8_t acc_n = vmc->code_memory[n_idx];
+void eval_rest()  {
+  uint8_t acc_n = ms.code[ms.pc+1];
   for(unsigned int i = 0; i < acc_n; i++){
-    cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-    cam_value_t v = heap_fst(&vmc->heap, (heap_index)e.value);
-    vmc->contexts[vmc->current_running_context_id].env = v;
+    cam_value_t v = heap_fst(&vmc->heap, (heap_index)ms.env.value);
+    ms.env = v;
   }
-  *pc_idx = (*pc_idx) + 2;
+  ms.pc += 2;
 }
 
-void eval_push(vmc_t *vmc, INT *pc_idx) {
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  int i = stack_push(&vmc->contexts[vmc->current_running_context_id].stack, e);
+void eval_push() {
+  int i = spush(ms.env);
   if(i == 0){
     DEBUG_PRINT(("Stack push has failed"));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
-  (*pc_idx)++;
+  ms.pc++;
 }
 
-void eval_swap(vmc_t *vmc, INT *pc_idx) {
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_swap() {
+
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
-  int j = stack_push(&vmc->contexts[vmc->current_running_context_id].stack, e);
+  int j = spush(ms.env);
   if(j == 0){
     DEBUG_PRINT(("Stack push has failed"));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
-  vmc->contexts[vmc->current_running_context_id].env = hold_reg;
-  (*pc_idx)++;
+  ms.env = hold_reg;
+  ms.pc ++;
 }
 
-void eval_loadi(vmc_t *vmc, INT *pc_idx) {
-  INT int_idx1 = (*pc_idx) + 1;
-  INT int_idx2 = (*pc_idx) + 2;
-  uint16_t int_idx =
-    (vmc->code_memory[int_idx1] << 8) | vmc->code_memory[int_idx2]; // merge 2 bytes
+void eval_loadi() {
+  uint16_t int_idx = (ms.code[ms.pc + 1] << 8) | ms.code[ms.pc + 2];
   INT int_pool_offset = 7; //TODO: Should we verify the int pool size here?
   INT i_idx = int_pool_offset + 4 * int_idx; // each int 4 bytes wide
-  uint8_t byte0 = vmc->code_memory[i_idx];
-  uint8_t byte1 = vmc->code_memory[i_idx + 1];
-  uint8_t byte2 = vmc->code_memory[i_idx + 2];
-  uint8_t byte3 = vmc->code_memory[i_idx + 3];
+  uint8_t byte0 = ms.code[i_idx];
+  uint8_t byte1 = ms.code[i_idx + 1];
+  uint8_t byte2 = ms.code[i_idx + 2];
+  uint8_t byte3 = ms.code[i_idx + 3];
   INT i = (byte0 << 24) | (byte1 << 16) | (byte2 << 8) | byte3;
   cam_value_t v = { .value = (UINT)i, .flags = 0};
-  vmc->contexts[vmc->current_running_context_id].env = v;
-  *pc_idx = (*pc_idx) + 3;
+  ms.env = v;
+  ms.pc += 3;
 }
 
-void eval_loadb(vmc_t *vmc, INT *pc_idx) {
+void eval_loadb() {
   INT bool_idx = (*pc_idx) + 1;
-  uint8_t bool_val = vmc->code_memory[bool_idx];
+  uint8_t bool_val = ms.code[ms.pc + 1];
   cam_value_t v = { .value = (UINT)bool_val, .flags = 0};
-  vmc->contexts[vmc->current_running_context_id].env = v;
-  *pc_idx = (*pc_idx) + 2;
+  ms.env = v;
+  ms.pc += 2;
 }
 
-void eval_clear(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
+void eval_clear() {
   cam_value_t empty_tuple = { .value = 0, .flags = 0 };
-  vmc->contexts[vmc->current_running_context_id].env = empty_tuple;
+  ms.env = empty_tuple;
+  ms.pc ++;
 }
 
-void eval_cons(vmc_t *vmc, INT *pc_idx) {
+void eval_cons() {
   (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
-  heap_index hi = vmc_heap_alloc_withGC(vmc);
+  heap_index hi = vmc_heap_alloc_withGC(ms.vmc);
   if(hi == HEAP_NULL){
     DEBUG_PRINT(("Heap allocation has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
   } else {
-    // Assuming we have space for atleast one tuple
-    // Do we check this as well?
+    // We have room for a tuple
     cam_value_t env_pointer =
       { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-    vmc->contexts[vmc->current_running_context_id].env = env_pointer;
-    heap_set(&vmc->heap, hi, hold_reg, e);
+    ms.env = env_pointer;
+    heap_set(&ms.heap, hi, hold_reg, e);
   }
+  return;
 }
 
-void eval_cur(vmc_t *vmc, INT *pc_idx) {
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  uint16_t label = get_label(vmc, pc_idx);
-  cam_value_t cam_label =
-    { .value = (UINT)label, .flags = 0 };
-  heap_index hi = vmc_heap_alloc_withGC(vmc);
+void eval_cur() {
+  uint16_t label = get_label();
+  cam_value_t cam_label = { .value = (UINT)label, .flags = 0 };
+  heap_index hi = vmc_heap_alloc_withGC(ms.vmc);
   if(hi == HEAP_NULL){
     DEBUG_PRINT(("Heap allocation has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
   } else {
-    cam_value_t env_pointer =
-      { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-    vmc->contexts[vmc->current_running_context_id].env = env_pointer;
-    heap_set(&vmc->heap, hi, e, cam_label);
-    *pc_idx = (*pc_idx) + 3;
+    cam_value_t env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
+    heap_set(&ms.heap, hi, ms.env, cam_label);
+    ms.env = env_pointer;
+    ms.pc += 3;
   }
+  return;
 }
 
-void eval_pack(vmc_t *vmc, INT *pc_idx) {
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  uint16_t tag = get_tag(vmc, pc_idx);
+void eval_pack() {
+  uint16_t tag = get_tag();
   cam_value_t cam_tag =
     { .value = (UINT)tag, .flags = 0 };
-  heap_index hi = vmc_heap_alloc_withGC(vmc);
+  heap_index hi = vmc_heap_alloc_withGC(ms.vmc);
   if(hi == HEAP_NULL){
     DEBUG_PRINT(("Heap allocation has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
   } else {
-    cam_value_t env_pointer =
-      { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-    vmc->contexts[vmc->current_running_context_id].env = env_pointer;
-    heap_set(&vmc->heap, hi, cam_tag, e);
-    *pc_idx = (*pc_idx) + 3;
+    cam_value_t env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
+    heap_set(&vmc->heap, hi, cam_tag, ms.env);
+    ms.env = env_pointer;
+    ms.pc += 3;
   }
+  return;
 }
 
-void eval_skip(vmc_t *vmc, INT *pc_idx) {
-  (void)vmc;
-  (*pc_idx)++;
+void eval_skip() {
+  ms.pc++;
 }
 
-void eval_stop(vmc_t *vmc, INT *pc_idx) {
-  (void)pc_idx;
-  vmc->context_used[vmc->current_running_context_id] = false;
-  int i = dispatch(vmc);
+void eval_stop() {
+  ms.vmc->context_used[vmc->current_running_context_id] = false;
+  int i = dispatch(ms.vmc);
   if(i == -1)
     DEBUG_PRINT(("Ready Queue is empty\n"));
-  if(is_all_contexts_stopped(vmc)){
-    vmc->all_contexts_stopped = true;
+  if(is_all_contexts_stopped(ms.vmc)){
+    ms.vmc->all_contexts_stopped = true;
   }
-
 }
 
-void eval_app(vmc_t *vmc, INT *pc_idx) {
+void eval_app() {
 
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
 
-  heap_index closure_address = e.value; // TODO: should we do a pointer check here?
-                                        // closure or combinator, the if checks that
+  heap_index closure_address = ms.env.value; // TODO: should we do a pointer check here?
+                                             // closure or combinator, the if checks that
 
-  cam_value_t heap_f = heap_fst(&vmc->heap, closure_address);
-  cam_value_t heap_s = heap_snd(&vmc->heap, closure_address);
+  cam_value_t heap_f = heap_fst(&ms.heap, closure_address);
+  cam_value_t heap_s = heap_snd(&ms.heap, closure_address);
 
   if(heap_s.value == COMB){ // if combinator
 
     cam_value_t label = heap_f;
 
-    vmc->contexts[vmc->current_running_context_id].env = hold_reg;
+    ms.env = hold_reg;
 
 
     //jump to label
-    INT jump_address = (*pc_idx) + 1; // see Jump convention at the top
+    INT jump_address = ms.pc + 1; // see Jump convention at the top
     cam_value_t j_add = { .value = (UINT)jump_address };
-    int j = stack_push(&vmc->contexts[vmc->current_running_context_id].stack, j_add);
+    int j = spush(j_add);
     if(j == 0){
       DEBUG_PRINT(("Stack push has failed"));
-      *pc_idx = -1;
+      ms.pc = -1;
       return;
     }
-    *pc_idx = (INT)label.value;
+    ms.pc = (INT)label.value;
 
   } else { // not a combinator but a closure
 
     cam_value_t val = heap_f;
     cam_value_t label = heap_s;
 
-    heap_index hi = vmc_heap_alloc_withGC(vmc);
+    heap_index hi = vmc_heap_alloc_withGC(ms.vmc);
     if(hi == HEAP_NULL){
       DEBUG_PRINT(("Heap allocation has failed"));
-      *pc_idx = -1;
+      ms.pc = -1;
       return;
     }
-    heap_set(&vmc->heap, hi, val, hold_reg);
-    cam_value_t new_env_pointer =
-      { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-    vmc->contexts[vmc->current_running_context_id].env = new_env_pointer;
+    heap_set(&ms.heap, hi, val, hold_reg);
+    cam_value_t new_env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
+    ms.env = new_env_pointer;
 
 
     //jump to label
-    INT jump_address = (*pc_idx) + 1; // see Jump convention at the top
+    INT jump_address = ms.pc + 1; // see Jump convention at the top
     cam_value_t j_add = { .value = (UINT)jump_address };
-    int j = stack_push(&vmc->contexts[vmc->current_running_context_id].stack, j_add);
+    int j = spush(j_add);
     if(j == 0){
       DEBUG_PRINT(("Stack push has failed"));
-      *pc_idx = -1;
+      ms.pc = -1;
       return;
     }
-    *pc_idx = (INT)label.value;
-
+    ms.pc = (INT)label.value;
   }
-
 }
 
-void eval_return(vmc_t *vmc, INT *pc_idx) {
+void eval_return() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
-  *pc_idx = hold_reg.value;
+  ms.pc = hold_reg.value;
 }
 
-void eval_call(vmc_t *vmc, INT *pc_idx) {
-  uint16_t label = get_label(vmc, pc_idx);
-  INT jump_address = (*pc_idx) + 3; // see Jump convention at the top
+void eval_call() {
+  uint16_t label = get_label();
+  INT jump_address = ms.pc + 3; // see Jump convention at the top
   cam_value_t j_add = { .value = (UINT)jump_address };
-  int i = stack_push(&vmc->contexts[vmc->current_running_context_id].stack, j_add);
+  int i = spush(j_add);
   if(i == 0){
     DEBUG_PRINT(("Stack push has failed"));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
-  *pc_idx = (INT)label;
+  ms.pc = (INT)label;
 }
 
-void eval_goto(vmc_t *vmc, INT *pc_idx) {
-  uint16_t label = get_label(vmc, pc_idx);
+void eval_goto() {
+  uint16_t label = get_label();
   // GOTO doesn't store jump address on stack
-  *pc_idx = (INT)label;
+  ms.pc = (INT)label;
 }
 
-void eval_gotofalse(vmc_t *vmc, INT *pc_idx) {
+void eval_gotofalse() {
   cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
-  vmc->contexts[vmc->current_running_context_id].env = hold_reg;
-  if ((e.value & 1) == 0){ // NOT SET; FALSE
-    eval_goto(vmc, pc_idx);
+  if ((ms.env.value & 1) == 0){ // NOT SET; FALSE
+    ms.env = hold_reg;
+    eval_goto();
   } else { // TRUE
-    *pc_idx = (*pc_idx) + 3;
+    ms.env = hold_reg;
+    ms.pc += 3;
   }
 }
 
-void eval_switch(vmc_t *vmc, INT *pc_idx) {
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_switch() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
-  heap_index closure_address = e.value; // TODO: should we do a pointer check here?
-  cam_value_t tag_heap = heap_fst(&vmc->heap, closure_address);
-  cam_value_t val = heap_snd(&vmc->heap, closure_address);
-  INT switch_size_idx = (*pc_idx) + 1;
-  uint8_t switch_size = vmc->code_memory[switch_size_idx];
+  heap_index closure_address = ms.env.value; // TODO: should we do a pointer check here?
+  cam_value_t tag_heap = heap_fst(&ms.heap, closure_address);
+  cam_value_t val = heap_snd(&ms.heap, closure_address);
+  INT switch_size_idx = ms.pc + 1;
+  uint8_t switch_size = ms.code[switch_size_idx];
 
   int label_to_jump = -1;
 
   for(uint32_t i = (switch_size_idx + 1); i <= (switch_size_idx + (switch_size * 4)); i+=4){
-    INT tag_idx1 = i;
-    INT tag_idx2 = i + 1;
-    uint16_t tag =
-      (vmc->code_memory[tag_idx1] << 8) | vmc->code_memory[tag_idx2]; // merge 2 bytes
-
-    INT lab_idx1 = i + 2;
-    INT lab_idx2 = i + 3;
-    uint16_t label =
-      (vmc->code_memory[lab_idx1] << 8) | vmc->code_memory[lab_idx2]; // merge 2 bytes
-
+    uint16_t tag = (ms.code[i] << 8) | ms.code[i+1]; // merge 2 bytes
+    uint16_t label = (ms.code[i+2] << 8) | ms.code[i+3]; // merge 2 bytes
 
     if(tag_heap.value == (UINT)tag ||
        (UINT)tag == 65535){ //wildcard check; wildcard tag = max(uint16_t) = 65535
@@ -524,656 +543,618 @@ void eval_switch(vmc_t *vmc, INT *pc_idx) {
   }
   if(label_to_jump == -1){
     DEBUG_PRINT(("Tag %u not found while switching", tag_heap.value));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
 
-  heap_index hi = vmc_heap_alloc_withGC(vmc);
+  heap_index hi = vmc_heap_alloc_withGC(ms.vmc);
   if(hi == HEAP_NULL){
     DEBUG_PRINT(("Heap allocation has failed"));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
-  cam_value_t env_pointer =
-    { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-  vmc->contexts[vmc->current_running_context_id].env = env_pointer;
-  heap_set(&vmc->heap, hi, hold_reg, val);
+  cam_value_t env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
+  ms.env = env_pointer;
+  heap_set(&ms.heap, hi, hold_reg, val);
 
   //goto label
-  *pc_idx = (INT)label_to_jump;
+  ms.pc = (INT)label_to_jump;
 }
 
-void eval_abs(vmc_t *vmc, INT *pc_idx) {
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  INT signed_i = (INT)e.value;
+void eval_abs() {
+  INT signed_i = (INT)ms.env.value;
   INT abs_i = abs(signed_i);
   cam_value_t v = { .value = (UINT)abs_i, .flags = 0};
-  vmc->contexts[vmc->current_running_context_id].env = v;
-  (*pc_idx)++;
+  ms.env = v;
+  ms.pc++;
 }
 
-void eval_neg(vmc_t *vmc, INT *pc_idx) {
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  UINT i = e.value;
+void eval_neg() {
+  UINT i = ms.env.value;
   INT j = -i; // XXX: might cause underflow for large uints
   cam_value_t v = { .value = (UINT)j, .flags = 0};
-  vmc->contexts[vmc->current_running_context_id].env = v;
-  (*pc_idx)++;
+  ms.env = v;
+  ms.pc++;
 
 }
 
-void eval_not(vmc_t *vmc, INT *pc_idx) {
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  UINT i = e.value;
+void eval_not() {
+  UINT i = ms.env.value;
   UINT j = i ^ 1;
   cam_value_t v = { .value = j, .flags = 0};
-  vmc->contexts[vmc->current_running_context_id].env = v;
-  (*pc_idx)++;
+  ms.env = v;
+  ms.pc ++;
 
 }
 
-void eval_dec(vmc_t *vmc, INT *pc_idx) {
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  UINT i = e.value;
+void eval_dec() {
+  UINT i = ms.env.value;
   INT j = i - 1; // XXX: casting might cause issues for uint when outside int range
                  // dec should work with signed ints
   cam_value_t v = { .value = (UINT)j, .flags = 0};
-  vmc->contexts[vmc->current_running_context_id].env = v;
-  (*pc_idx)++;
-
+  ms.env = v;
+  ms.pc ++;
 }
 
-void eval_add_unsignedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_add_unsignedi() {
+  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
+  int i = spop(&hold_reg);
+  if(i == 0){
+    DEBUG_PRINT(("Stack pop has failed"));
+    ms.pc = -1;
+  } else {
+    cam_register_t final_value = { .flags = 0, .value = hold_reg.value + ms.env.value };
+    ms.env = final_value;
+    ms.pc ++;
+  }
+  return;
+}
+
+void eval_mul_unsignedi() {
+  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
+  int i = spop(&hold_reg);
+  if(i == 0){
+    DEBUG_PRINT(("Stack pop has failed"));
+    ms.pc = -1;
+  } else {
+    cam_register_t final_value = { .flags = 0, .value = hold_reg.value * ms.env.value };
+    ms.env = final_value;
+    ms.pc ++;
+  }
+  return;
+}
+
+void eval_min_unsignedi() {
+  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
+  int i = spop(&hold_reg);
+  if(i == 0){
+    DEBUG_PRINT(("Stack pop has failed"));
+    ms.pc = -1;
+  } else {
+    cam_register_t final_value = { .flags = 0, .value = hold_reg.value - ms.env.value };
+    ms.env = final_value;
+    ms.pc ++;
+  }
+  return;
+}
+
+void eval_add_signedi() {
+  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
+  int i = spop(&hold_reg);
+  if(i == 0){
+    DEBUG_PRINT(("Stack pop has failed"));
+    ms.pc = -1;
+  } else {
+    /* I think this may be overkill */
+    INT temp1;
+    INT temp2;
+    INT temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 + temp2;
+    memcpy(&final_value.value, &temp3, sizeof(INT));
+    ms.env = final_value;
+    ms.pc ++;
+  }
+  return;
+}
+
+void eval_mul_signedi() {
+
+  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
+  int i = spop(&hold_reg);
+  if(i == 0){
+    DEBUG_PRINT(("Stack pop has failed"));
+    ms.pc = -1;
+  } else {
+    INT temp1;
+    INT temp2;
+    INT temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 * temp2;
+    memcpy(&final_value.value, &temp3, sizeof(INT));
+    ms.env = final_value;
+    ms.pc ++;
+  }
+  return;
+}
+
+void eval_min_signedi() {
+  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
+  int i = spop(&hold_reg);
+  if(i == 0){
+    DEBUG_PRINT(("Stack pop has failed"));
+    ms.pc = -1;
+  } else {
+    INT temp1;
+    INT temp2;
+    INT temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 - temp2;
+    memcpy(&final_value.value, &temp3, sizeof(INT));
+    ms.env = final_value;
+    ms.pc ++;
+  }
+}
+
+
+void eval_addf() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
   int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    /* Here, this may actually be needed (not overkill) */
+    float temp1;
+    float temp2;
+    float temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 + temp2;
+    memcpy(&final_value.value, &temp3, sizeof(float));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  cam_register_t final_value =
-    { .flags = 0, .value = hold_reg.value + e.value };
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_mul_unsignedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_mulf() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    float temp1;
+    float temp2;
+    float temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 * temp2;
+    memcpy(&final_value.value, &temp3, sizeof(float));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  cam_register_t final_value =
-    { .flags = 0, .value = hold_reg.value * e.value };
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_min_unsignedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_minf() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    float temp1;
+    float temp2;
+    float temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 - temp2;
+    memcpy(&final_value.value, &temp3, sizeof(float));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  cam_register_t final_value =
-    { .flags = 0, .value = hold_reg.value - e.value };
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_add_signedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
-  if(i == 0){
-    DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
-  }
-  INT temp1;
-  INT temp2;
-  INT temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 + temp2;
-  memcpy(&final_value.value, &temp3, sizeof(INT));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
-}
-
-void eval_mul_signedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
-  if(i == 0){
-    DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
-  }
-  INT temp1;
-  INT temp2;
-  INT temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 * temp2;
-  memcpy(&final_value.value, &temp3, sizeof(INT));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
-}
-
-void eval_min_signedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
-  if(i == 0){
-    DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
-  }
-  INT temp1;
-  INT temp2;
-  INT temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 - temp2;
-  memcpy(&final_value.value, &temp3, sizeof(INT));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
-}
-
-
-void eval_addf(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
-  if(i == 0){
-    DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
-  }
-  float temp1;
-  float temp2;
-  float temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 + temp2;
-  memcpy(&final_value.value, &temp3, sizeof(float));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
-}
-
-void eval_mulf(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
-  if(i == 0){
-    DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
-  }
-  float temp1;
-  float temp2;
-  float temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 * temp2;
-  memcpy(&final_value.value, &temp3, sizeof(float));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
-}
-
-void eval_minf(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
-  if(i == 0){
-    DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
-  }
-  float temp1;
-  float temp2;
-  float temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 - temp2;
-  memcpy(&final_value.value, &temp3, sizeof(float));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
-}
-
-void eval_gt_unsignedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_gt_unsignedi() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 };
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    cam_register_t final_value = { .flags = 0, .value = hold_reg.value > ms.env.value };
+    ms.env = final_value;
+    ms.pc ++;
   }
-  cam_register_t final_value =
-    { .flags = 0, .value = hold_reg.value > e.value };
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_lt_unsignedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_lt_unsignedi() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 };
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = stack_pop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    cam_register_t final_value = { .flags = 0, .value = hold_reg.value < ms.env.value };
+    ms.env = final_value;
+    ms.pc ++;
   }
-  cam_register_t final_value =
-    { .flags = 0, .value = hold_reg.value < e.value };
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_ge_unsignedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_ge_unsignedi() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 };
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    cam_register_t final_value = { .flags = 0, .value = hold_reg.value >= ms.env.value };
+    ms.env = final_value;
+    ms.pc ++;
   }
-  cam_register_t final_value =
-    { .flags = 0, .value = hold_reg.value >= e.value };
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_le_unsignedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_le_unsignedi() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 };
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    cam_register_t final_value = { .flags = 0, .value = hold_reg.value <= ms.env.value };
+    ms.env = final_value;
+    ms.pc ++;
   }
-  cam_register_t final_value =
-    { .flags = 0, .value = hold_reg.value <= e.value };
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_gt_signedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_gt_signedi() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    INT temp1;
+    INT temp2;
+    INT temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 > temp2;
+    memcpy(&final_value.value, &temp3, sizeof(INT));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  INT temp1;
-  INT temp2;
-  INT temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 > temp2;
-  memcpy(&final_value.value, &temp3, sizeof(INT));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_lt_signedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_lt_signedi() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    INT temp1;
+    INT temp2;
+    INT temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 < temp2;
+    memcpy(&final_value.value, &temp3, sizeof(INT));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  INT temp1;
-  INT temp2;
-  INT temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 < temp2;
-  memcpy(&final_value.value, &temp3, sizeof(INT));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_ge_signedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_ge_signedi() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    INT temp1;
+    INT temp2;
+    INT temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 >= temp2;
+    memcpy(&final_value.value, &temp3, sizeof(INT));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  INT temp1;
-  INT temp2;
-  INT temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 >= temp2;
-  memcpy(&final_value.value, &temp3, sizeof(INT));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_le_signedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_le_signedi() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    INT temp1;
+    INT temp2;
+    INT temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 <= temp2;
+    memcpy(&final_value.value, &temp3, sizeof(INT));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  INT temp1;
-  INT temp2;
-  INT temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 <= temp2;
-  memcpy(&final_value.value, &temp3, sizeof(INT));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
-
+  return;
 }
 
-void eval_gtf(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_gtf() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    float temp1;
+    float temp2;
+    float temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 > temp2;
+    memcpy(&final_value.value, &temp3, sizeof(float));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  float temp1;
-  float temp2;
-  float temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 > temp2;
-  memcpy(&final_value.value, &temp3, sizeof(float));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_ltf(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_ltf() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    float temp1;
+    float temp2;
+    float temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 < temp2;
+    memcpy(&final_value.value, &temp3, sizeof(float));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  float temp1;
-  float temp2;
-  float temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 < temp2;
-  memcpy(&final_value.value, &temp3, sizeof(float));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_gef(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_gef() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    float temp1;
+    float temp2;
+    float temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 >= temp2;
+    memcpy(&final_value.value, &temp3, sizeof(float));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  float temp1;
-  float temp2;
-  float temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 >= temp2;
-  memcpy(&final_value.value, &temp3, sizeof(float));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_lef(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_lef() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    float temp1;
+    float temp2;
+    float temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 <= temp2;
+    memcpy(&final_value.value, &temp3, sizeof(float));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  float temp1;
-  float temp2;
-  float temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 <= temp2;
-  memcpy(&final_value.value, &temp3, sizeof(float));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
 
 // Equality on base types
 
-void eval_eq_unsignedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_eq_unsignedi() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    cam_register_t final_value = { .flags = 0, .value = hold_reg.value == ms.env.value };
+    ms.env = final_value;
+    ms.pc ++;
   }
-  cam_register_t final_value =
-    { .flags = 0, .value = hold_reg.value == e.value };
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_eq_signedi(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+
+void eval_eq_signedi() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    INT temp1;
+    INT temp2;
+    INT temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 == temp2;
+    memcpy(&final_value.value, &temp3, sizeof(INT));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  INT temp1;
-  INT temp2;
-  INT temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 == temp2;
-  memcpy(&final_value.value, &temp3, sizeof(INT));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_eqf(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+void eval_eqf() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 }; // init register
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    float temp1;
+    float temp2;
+    float temp3;
+    cam_register_t final_value = { .flags = 0, .value = 0 };
+    memcpy(&temp1, &hold_reg.value, sizeof(UINT));
+    memcpy(&temp2, &ms.env.value, sizeof(UINT));
+    temp3 = temp1 == temp2;
+    memcpy(&final_value.value, &temp3, sizeof(float));
+    ms.env = final_value;
+    ms.pc ++;
   }
-  float temp1;
-  float temp2;
-  float temp3;
-  cam_register_t final_value = { .flags = 0, .value = 0 };
-  memcpy(&temp1, &hold_reg.value, sizeof(UINT));
-  memcpy(&temp2, &e.value, sizeof(UINT));
-  temp3 = temp1 == temp2;
-  memcpy(&final_value.value, &temp3, sizeof(float));
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
-
+  return;
 }
 
-void eval_eq_bool(vmc_t *vmc, INT *pc_idx) {
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env; // bool represented using uint
+void eval_eq_bool() {
   cam_register_t hold_reg = { .flags = 0, .value = 0 };
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    cam_register_t final_value = { .flags = 0, .value = hold_reg.value == ms.env.value };
+    ms.env = final_value;
+    ms.pc ++;
   }
-  cam_register_t final_value =
-    { .flags = 0, .value = hold_reg.value == e.value };
-  vmc->contexts[vmc->current_running_context_id].env = final_value;
+  return;
 }
 
-void eval_move(vmc_t *vmc, INT *pc_idx){
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-  int i = stack_push(&vmc->contexts[vmc->current_running_context_id].stack, e);
+void eval_move(){
+  int i = spush(ms.env);
   if(i == 0){
     DEBUG_PRINT(("Stack push has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    cam_value_t empty_tuple = { .value = 0, .flags = 0 };
+    ms.env = empty_tuple;
+    ms.pc ++;
   }
-
-  cam_value_t empty_tuple = { .value = 0, .flags = 0 };
-  vmc->contexts[vmc->current_running_context_id].env = empty_tuple;
-
-  (*pc_idx)++;
-
+  return;
 }
 
-void eval_pop (vmc_t *vmc, INT *pc_idx){
+void eval_pop (){
   cam_register_t r;
-  int i = stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &r);
+  int i = spop(&r);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
+  } else {
+    ms.env = r;
+    ms.pc ++;
   }
-  vmc->contexts[vmc->current_running_context_id].env = r;
-
-  (*pc_idx)++;
+  return;
 }
-void eval_snoc(vmc_t *vmc, INT *pc_idx){
-  (*pc_idx)++;
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
+
+void eval_snoc(){
   cam_register_t hold_reg;
-  int i =
-    stack_pop(&vmc->contexts[vmc->current_running_context_id].stack, &hold_reg);
+  int i = spop(&hold_reg);
   if(i == 0){
     DEBUG_PRINT(("Stack pop has failed"));
-    *pc_idx = -1;
-    return;
-  }
-  heap_index hi = vmc_heap_alloc_withGC(vmc);
-  if(hi == HEAP_NULL){
-    DEBUG_PRINT(("Heap allocation has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
   } else {
-    // Assuming we have space for atleast one tuple
-    // Do we check this as well?
-    cam_value_t env_pointer =
-      { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-    vmc->contexts[vmc->current_running_context_id].env = env_pointer;
-    heap_set(&vmc->heap, hi, e, hold_reg);
+    heap_index hi = vmc_heap_alloc_withGC(ms.vmc);
+    if(hi == HEAP_NULL){
+      DEBUG_PRINT(("Heap allocation has failed"));
+      ms.pc = -1;
+    } else {
+      // Assuming we have space for atleast one tuple
+      // Do we check this as well?
+      cam_value_t env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
+      heap_set(&vmc->heap, hi, ms.env, hold_reg);
+      ms.env = env_pointer;
+      ms.pc ++;
+    }
   }
-
+  return;
 }
-void eval_comb(vmc_t *vmc, INT *pc_idx){
+void eval_comb(){
 
-  uint16_t label = get_label(vmc, pc_idx);
-  cam_value_t cam_label =
-    { .value = (UINT)label, .flags = 0 };
-  heap_index hi = vmc_heap_alloc_withGC(vmc);
+  uint16_t label = get_label();
+  cam_value_t cam_label = { .value = (UINT)label, .flags = 0 };
+  heap_index hi = vmc_heap_alloc_withGC(ms.vmc);
   if(hi == HEAP_NULL){
     DEBUG_PRINT(("Heap allocation has failed"));
-    *pc_idx = -1;
-    return;
+    ms.pc = -1;
   } else {
-    cam_value_t env_pointer =
-      { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
-    vmc->contexts[vmc->current_running_context_id].env = env_pointer;
-
+    cam_value_t env_pointer = { .value = (UINT)hi, .flags = VALUE_PTR_BIT };
 
     // This value is used to demarcate a heap cell as
     // storing a combinator value rather than a closure
     cam_value_t dummy_val = { .value = COMB };
 
-
-    heap_set(&vmc->heap, hi, cam_label, dummy_val);
-
-    *pc_idx = (*pc_idx) + 3;
+    heap_set(&ms.heap, hi, cam_label, dummy_val);
+    ms.env = env_pointer;
+    ms.pc += 3;
   }
-
+  return;
 }
-void eval_gotoifalse(vmc_t *vmc, INT *pc_idx){
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-
+void eval_gotoifalse(){
   if ((e.value & 1) == 0){ // NOT SET; FALSE
-    eval_goto(vmc, pc_idx);
+    eval_goto();
   } else { // TRUE
-    *pc_idx = (*pc_idx) + 3;
+   ms.pc += 3;
   }
-
+  return;
 }
 
-void eval_switchi(vmc_t *vmc, INT *pc_idx){
+void eval_switchi(){
 
-  cam_register_t e = vmc->contexts[vmc->current_running_context_id].env;
-
-  heap_index tag_val_pair = e.value;
-  cam_value_t tag_heap = heap_fst(&vmc->heap, tag_val_pair);
-  cam_value_t val      = heap_snd(&vmc->heap, tag_val_pair);
-  INT switch_size_idx = (*pc_idx) + 1;
-  uint8_t switch_size = vmc->code_memory[switch_size_idx];
+  heap_index tag_val_pair = ms.env.value;
+  cam_value_t tag_heap = heap_fst(&ms.heap, tag_val_pair);
+  cam_value_t val      = heap_snd(&ms.heap, tag_val_pair);
+  INT switch_size_idx = ms-pc + 1;
+  uint8_t switch_size = ms.code[switch_size_idx];
 
   int label_to_jump = -1;
   for(uint32_t i = (switch_size_idx + 1); i <= (switch_size_idx + (switch_size * 4)); i+=4){
-    INT tag_idx1 = i;
-    INT tag_idx2 = i + 1;
-    uint16_t tag =
-      (vmc->code_memory[tag_idx1] << 8) | vmc->code_memory[tag_idx2]; // merge 2 bytes
-
-    INT lab_idx1 = i + 2;
-    INT lab_idx2 = i + 3;
-    uint16_t label =
-      (vmc->code_memory[lab_idx1] << 8) | vmc->code_memory[lab_idx2]; // merge 2 bytes
-
+    uint16_t tag = (ms.code[i] << 8) | vmc->code_memory[i+1]; // merge 2 bytes
+    uint16_t label = (ms-code[i+2] << 8) | ms-code[i+3]; // merge 2 bytes
 
     if(tag_heap.value == (UINT)tag ||
        (UINT)tag == 65535){ //wildcard check; wildcard tag = max(uint16_t) = 65535
@@ -1183,17 +1164,17 @@ void eval_switchi(vmc_t *vmc, INT *pc_idx){
   }
   if(label_to_jump == -1){
     DEBUG_PRINT(("Tag %u not found while switching", tag_heap.value));
-    *pc_idx = -1;
+    ms.pc = -1;
     return;
   }
-
-  vmc->contexts[vmc->current_running_context_id].env = val;
-
-
+  ms.env = val;
   //goto label
-  *pc_idx = (INT)label_to_jump;
-
+  ms.pc = (INT)label_to_jump;
 }
+
+/**************************************************************/
+/*  TODO ALL THE HANDLERS */
+
 
 static int handle_spawn(vmc_t *vmc){
 
@@ -1466,9 +1447,8 @@ static int handle_time(vmc_t *vmc){
 
 }
 
-void eval_callrts(vmc_t *vmc, INT *pc_idx){
-  INT n_idx = (*pc_idx) + 1;
-  uint8_t rts_op_no = vmc->code_memory[n_idx];
+void eval_callrts(){
+  uint8_t rts_op_no = ms.code_memory[ms.pc + 1];
 
   // do all operations here
     /* spawn     - 0 */
@@ -1481,45 +1461,45 @@ void eval_callrts(vmc_t *vmc, INT *pc_idx){
     /* wrap      - 7 */
     /* time      - 8 */
 
-  int ret_code = -1; 
+  int ret_code = -1;
   switch(rts_op_no){
     case 0:
-      ret_code = handle_spawn(vmc);
+      ret_code = handle_spawn();
       break;
     case 1:
-      ret_code = handle_channel(vmc);
+      ret_code = handle_channel();
       break;
     case 2:
-      ret_code = handle_sendevt(vmc);
+      ret_code = handle_sendevt();
       break;
     case 3:
-      ret_code = handle_recvevt(vmc);
+      ret_code = handle_recvevt();
       break;
     case 4:
-      ret_code = handle_sync(vmc);
+      ret_code = handle_sync();
       break;
     case 5:
-      ret_code = handle_choose(vmc);
+      ret_code = handle_choose();
       break;
     case 6:
-      ret_code = handle_spawnExternal(vmc);
+      ret_code = handle_spawnExternal();
       break;
     case 7:
-      ret_code = handle_wrap(vmc);
+      ret_code = handle_wrap();
       break;
     case 8:
-      ret_code = handle_time(vmc);
+      ret_code = handle_time();
       break;
     default:
       DEBUG_PRINT(("Invalid RTS op number"));
-      *pc_idx = ret_code;
+      ms.pc = ret_code;
       return;
   }
   if(ret_code == -1){
     DEBUG_PRINT(("Error in RTS function"));
-    *pc_idx = ret_code;
-  } else { 
+    ms.pc = ret_code;
+  } else {
 
-    *pc_idx = (*pc_idx) + 2;
+    ms.pc += 2;
   }
 }
