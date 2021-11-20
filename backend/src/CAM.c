@@ -183,7 +183,10 @@ typedef struct {
   value_flags_t *stack_flags;
   UINT stack_size;
 
-
+  UINT instruction_quota; // Instruction evaluation quota
+                          // TODO: Set each time scheduler
+                          // runs "step" 
+  
   /* constant for each VMC */
   const uint8_t *code;
   UINT code_size;
@@ -212,7 +215,12 @@ void cam_setup_machine_state(vmc_t *vmc) {
 /* TODO: Try to see if we can run some predetermined number of steps */
 /* for each call to cam_step. This should improve efficiency a lot!  */
 /* One idea could be to execute 10 instructions or until there is  a */
-/* blocking instruction. Whichever comes first                       */
+/* blocking instruction. Whichever comes first.                      */
+/* Potentially the evaluator could return a boolean that indicates   */
+/* if it can keep going or not. Or maybe better, the evaluator       */
+/* returns a number symbolising how many more instructions the loop  */
+/* should process. The a blocking operation can return 0 and all     */
+/* other instructions returns a count.                               */
 int cam_step(void) {
   uint8_t inst = ms.code[ms.pc];
   evaluators[inst]();
