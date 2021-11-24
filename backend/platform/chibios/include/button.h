@@ -31,9 +31,10 @@
 
 typedef struct {
   stm32_gpio_t *port;
-  uint16_t pad;
+  uint32_t pad;
   uint32_t id;
   uint32_t state;
+  uint32_t mode;
   chibios_interop_t *interop;
 } button_driver_internal_t;
 
@@ -52,6 +53,7 @@ extern void button_cb(void *arg);
   XbdrvX.internal.pad = BUTTON##XbidX##_PIN;\
   XbdrvX.internal.id = XbidX;\
   XbdrvX.internal.state = false;\
+  XbdrvX.internal.mode = BUTTON##XbidX##_EVENT_MODE;\
   XbdrvX.internal.interop = (chibios_interop_t*)XcustomX;\
   palEnablePadEvent(BUTTON##XbidX##_GPIO, BUTTON##XbidX##_PIN, BUTTON##XbidX##_EVENT_MODE);\
   palSetPadCallback(BUTTON##XbidX##_GPIO, BUTTON##XbidX##_PIN, button_cb, &XbdrvX);\

@@ -92,7 +92,7 @@ endif
 PROJECT = TEST
 
 # Imported source files and paths
-CHIBIOS  := ../../../../ChibiOS_20.3.3
+CHIBIOS  := ../../../../ChibiOS_20.3.4
 BUILDDIR := ./build
 DEPDIR   := ./.dep
 

@@ -112,7 +112,7 @@ static int send_message(chibios_interop_t *this, svm_msg_t msg) {
     *m = msg;
     msg_t msg_val = chMBPostI(this->mb, (uint32_t)m);
     if (msg_val != MSG_OK) {
-      chPoolFree(this->msg_pool, (void*)m);
+      chPoolFreeI(this->msg_pool, (void*)m);
       r = -1;
     }
   }
