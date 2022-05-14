@@ -1,3 +1,9 @@
+# **NOTE**
+
+Sense-VM has changed name to SynchronVM and is available in a new
+repository [here](https://github.com/SynchronVM/SynchronVM).
+
+
 # Sense-VM
 
 <img src="https://raw.githubusercontent.com/svenssonjoel/Sense-VM/master/logo/bergsget_blue_small.png" width="200" height="250" />
